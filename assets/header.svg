@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="Multilingual NLP Pipeline — six stages reducing 1,383,600 news articles in about 55 languages to 13,333 verifiable flood events">
+  <title>Multilingual NLP Pipeline</title>
+
+  <defs>
+    <linearGradient id="surface" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14181f"/>
+      <stop offset="0.55" stop-color="#1a1a19"/>
+      <stop offset="1" stop-color="#101319"/>
+    </linearGradient>
+    <linearGradient id="streamFade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"    stop-color="#3987e5" stop-opacity="0"/>
+      <stop offset="0.18" stop-color="#3987e5" stop-opacity="0.85"/>
+      <stop offset="0.75" stop-color="#86b6ef" stop-opacity="0.95"/>
+      <stop offset="1"    stop-color="#cde2fb" stop-opacity="1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#cde2fb" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#cde2fb" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <style>
+    .ink      { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .title    { font-size: 46px; font-weight: 700; fill: #ffffff; letter-spacing: -0.5px; }
+    .sub      { font-size: 16.5px; font-weight: 400; fill: #c3c2b7; }
+    .tag      { font-size: 12.5px; font-weight: 600; fill: #86b6ef; letter-spacing: 1.6px; }
+    .lang     { font-size: 11px; font-weight: 500; fill: #898781; }
+    .out      { font-size: 13px; font-weight: 600; fill: #cde2fb; }
+
+    .stream {
+      fill: none;
+      stroke: url(#streamFade);
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-dasharray: 7 26;
+      animation: flow 3.2s linear infinite;
+    }
+    @keyframes flow { to { stroke-dashoffset: -330; } }
+
+    .rise { opacity: 0; animation: rise 0.9s cubic-bezier(.2,.7,.3,1) forwards; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pulse { animation: pulse 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.82); }
+      50%      { opacity: 1;    transform: scale(1.12); }
+    }
+
+    .blink { animation: blink 3.2s ease-in-out infinite; }
+    @keyframes blink { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stream { animation: none; stroke-dasharray: none; stroke-opacity: 0.55; }
+      .rise   { animation: none; opacity: 1; }
+      .pulse  { animation: none; opacity: 0.9; }
+      .blink  { animation: none; opacity: 0.9; }
+    }
+  </style>
+
+  <rect width="1200" height="320" rx="14" fill="url(#surface)"/>
+  <rect x="0.5" y="0.5" width="1199" height="319" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.10"/>
+
+  <!-- ── text block ─────────────────────────────────────────────── -->
+  <g class="ink">
+    <text class="tag rise"   x="60" y="62"  style="animation-delay:.05s">GDELT · NLLB-200 · QWEN3-14B · FULLY OFFLINE</text>
+    <text class="title rise" x="60" y="118" style="animation-delay:.15s">Multilingual NLP Pipeline</text>
+    <text class="sub rise"   x="60" y="152" style="animation-delay:.25s">Six stages that reduce 1,383,600 news articles in ~55 languages</text>
+    <text class="sub rise"   x="60" y="175" style="animation-delay:.32s">to <tspan fill="#ffffff" font-weight="700">13,333</tspan> verifiable, structured flood events — a <tspan fill="#ffffff" font-weight="700">104×</tspan> compression.</text>
+  </g>
+
+  <!-- ── converging data streams ────────────────────────────────── -->
+  <g>
+    <path class="stream" d="M 60,214 C 470,214 700,252 1092,252" style="animation-delay:-0.0s"/>
+    <path class="stream" d="M 60,224 C 470,224 700,252 1092,252" style="animation-delay:-0.5s"/>
+    <path class="stream" d="M 60,234 C 470,234 700,252 1092,252" style="animation-delay:-1.1s"/>
+    <path class="stream" d="M 60,244 C 470,244 700,252 1092,252" style="animation-delay:-1.6s"/>
+    <path class="stream" d="M 60,254 C 470,254 700,252 1092,252" style="animation-delay:-0.3s"/>
+    <path class="stream" d="M 60,264 C 470,264 700,252 1092,252" style="animation-delay:-2.1s"/>
+    <path class="stream" d="M 60,274 C 470,274 700,252 1092,252" style="animation-delay:-0.8s"/>
+    <path class="stream" d="M 60,284 C 470,284 700,252 1092,252" style="animation-delay:-2.6s"/>
+    <path class="stream" d="M 60,294 C 470,294 700,252 1092,252" style="animation-delay:-1.4s"/>
+    <path class="stream" d="M 60,204 C 470,204 700,252 1092,252" style="animation-delay:-1.9s"/>
+  </g>
+
+  <!-- source-side language tags -->
+  <g class="ink">
+    <text class="lang" x="60" y="196">en · hi · es · fr · pt · id · ar · bn · ta · tr · vi · th · ru · de · +41 more</text>
+  </g>
+
+  <!-- convergence point -->
+  <circle cx="1092" cy="252" r="26" fill="url(#glow)" class="pulse"/>
+  <circle cx="1092" cy="252" r="5.5" fill="#cde2fb" class="blink"/>
+  <g class="ink">
+    <text class="out" x="1064" y="292" text-anchor="end">13,333 structured events</text>
+  </g>
+</svg>

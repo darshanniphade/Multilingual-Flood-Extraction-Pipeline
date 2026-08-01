@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-label="Funnel chart. GDELT corpus 1,383,600 articles. Lexical flood filter keeps 233,153, or 16.85 percent. Clean and deduplicate keeps 171,742, or 73.7 percent. LLM extraction keeps 28,823, or 22.1 percent. Verifiability gate keeps 13,333, or 46.3 percent. End to end retention is 0.96 percent.">
+  <title>The funnel — 1,383,600 articles to 13,333 verifiable flood events</title>
+
+  <defs>
+    <linearGradient id="fsurface" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14181f"/>
+      <stop offset="1" stop-color="#1a1a19"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .ink   { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .h     { font-size: 21px; font-weight: 700; fill: #ffffff; }
+    .hsub  { font-size: 13.5px; fill: #898781; }
+    .stage { font-size: 14.5px; font-weight: 600; fill: #ffffff; }
+    .meta  { font-size: 11.5px; fill: #898781; }
+    .val   { font-size: 14.5px; font-weight: 700; fill: #ffffff; font-variant-numeric: tabular-nums; }
+    .keep  { font-size: 12px; font-weight: 600; fill: #86b6ef; font-variant-numeric: tabular-nums; }
+    .foot  { font-size: 13px; fill: #c3c2b7; }
+
+    .bar {
+      transform-box: fill-box;
+      transform-origin: left center;
+      transform: scaleX(0);
+      animation: grow 1.05s cubic-bezier(.2,.75,.3,1) forwards;
+    }
+    @keyframes grow { to { transform: scaleX(1); } }
+
+    .lbl { opacity: 0; animation: fade 0.55s ease-out forwards; }
+    @keyframes fade { to { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bar { animation: none; transform: scaleX(1); }
+      .lbl { animation: none; opacity: 1; }
+    }
+  </style>
+
+  <rect width="1200" height="470" rx="14" fill="url(#fsurface)"/>
+  <rect x="0.5" y="0.5" width="1199" height="469" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.10"/>
+
+  <g class="ink">
+    <text class="h"    x="48" y="52">The funnel</text>
+    <text class="hsub" x="48" y="76">Bar length is linear — the narrowing is the story. Every figure measured from artifacts on disk.</text>
+  </g>
+
+  <!-- baseline -->
+  <line x1="330" y1="110" x2="330" y2="418" stroke="#383835" stroke-width="1"/>
+
+  <!-- ── row 1 · 1,383,600 → w 700 ─────────────────────────────── -->
+  <g class="ink">
+    <text class="stage lbl" x="48" y="132" style="animation-delay:.05s">GDELT corpus</text>
+    <text class="meta  lbl" x="48" y="149" style="animation-delay:.05s">2021 · ~55 languages</text>
+    <rect class="bar" x="330" y="118" width="700" height="26" rx="4" fill="#184f95" style="animation-delay:.05s"/>
+    <text class="val lbl" x="1044" y="136" style="animation-delay:.55s">1,383,600</text>
+  </g>
+
+  <!-- ── row 2 · 233,153 → w 117.9 ─────────────────────────────── -->
+  <g class="ink">
+    <text class="stage lbl" x="48" y="200" style="animation-delay:.20s">Lexical flood filter</text>
+    <text class="meta  lbl" x="48" y="217" style="animation-delay:.20s">no model · 45 seconds</text>
+    <rect class="bar" x="330" y="186" width="117.9" height="26" rx="4" fill="#256abf" style="animation-delay:.20s"/>
+    <text class="val  lbl" x="462" y="204" style="animation-delay:.70s">233,153</text>
+    <text class="keep lbl" x="556" y="204" style="animation-delay:.70s">16.85 % kept</text>
+  </g>
+
+  <!-- ── row 3 · 171,742 → w 86.9 ──────────────────────────────── -->
+  <g class="ink">
+    <text class="stage lbl" x="48" y="268" style="animation-delay:.35s">Clean + deduplicate</text>
+    <text class="meta  lbl" x="48" y="285" style="animation-delay:.35s">SHA-256 exact · 52 workers</text>
+    <rect class="bar" x="330" y="254" width="86.9" height="26" rx="4" fill="#3987e5" style="animation-delay:.35s"/>
+    <text class="val  lbl" x="431" y="272" style="animation-delay:.85s">171,742</text>
+    <text class="keep lbl" x="525" y="272" style="animation-delay:.85s">73.7 % kept</text>
+  </g>
+
+  <!-- ── row 4 · 28,823 → w 14.6 ───────────────────────────────── -->
+  <g class="ink">
+    <text class="stage lbl" x="48" y="336" style="animation-delay:.50s">LLM extraction</text>
+    <text class="meta  lbl" x="48" y="353" style="animation-delay:.50s">qwen3:14b · JSON mode · T=0</text>
+    <rect class="bar" x="330" y="322" width="14.6" height="26" rx="4" fill="#86b6ef" style="animation-delay:.50s"/>
+    <text class="val  lbl" x="359" y="340" style="animation-delay:1.0s">28,823</text>
+    <text class="keep lbl" x="443" y="340" style="animation-delay:1.0s">22.1 % kept</text>
+  </g>
+
+  <!-- ── row 5 · 13,333 → w 6.7 ────────────────────────────────── -->
+  <g class="ink">
+    <text class="stage lbl" x="48" y="404" style="animation-delay:.65s">Verifiable events</text>
+    <text class="meta  lbl" x="48" y="421" style="animation-delay:.65s">exact date + flooded location</text>
+    <rect class="bar" x="330" y="390" width="6.7" height="26" rx="4" fill="#cde2fb" style="animation-delay:.65s"/>
+    <text class="val  lbl" x="351" y="408" style="animation-delay:1.15s">13,333</text>
+    <text class="keep lbl" x="435" y="408" style="animation-delay:1.15s">46.3 % kept</text>
+  </g>
+
+  <g class="ink">
+    <text class="foot lbl" x="48" y="450" style="animation-delay:1.35s">
+      End-to-end <tspan fill="#ffffff" font-weight="700">13,333 / 1,383,600 = 0.96 %</tspan>
+      <tspan fill="#898781">  ·  LLM extraction covers 9 of 12 months (130,477 articles); 40,839 remain.</tspan>
+    </text>
+  </g>
+</svg>

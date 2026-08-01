@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" width="1200" height="250" role="img" aria-label="Six stage pipeline: title translation, lexical flood filter, article translation, clean and deduplicate, LLM structured extraction, flatten to CSV. A pulse travels through the stages in order.">
+  <title>Six-stage pipeline flow</title>
+
+  <defs>
+    <linearGradient id="psurface" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14181f"/>
+      <stop offset="1" stop-color="#1a1a19"/>
+    </linearGradient>
+    <linearGradient id="rail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#184f95"/>
+      <stop offset="1" stop-color="#cde2fb"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .ink  { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .n    { font-size: 11px; font-weight: 700; fill: #0b0b0b; }
+    .name { font-size: 13.5px; font-weight: 600; fill: #ffffff; }
+    .tool { font-size: 10.5px; fill: #898781; }
+    .cnt  { font-size: 11.5px; font-weight: 600; fill: #86b6ef; font-variant-numeric: tabular-nums; }
+    .h    { font-size: 21px; font-weight: 700; fill: #ffffff; }
+
+    /* a pulse of light sweeping the rail, left to right, forever */
+    .spark {
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 34 1166;
+      animation: sweep 4.4s cubic-bezier(.45,0,.55,1) infinite;
+    }
+    @keyframes sweep {
+      0%   { stroke-dashoffset: 34;    opacity: 0; }
+      6%   { opacity: 0.95; }
+      88%  { opacity: 0.95; }
+      100% { stroke-dashoffset: -1166; opacity: 0; }
+    }
+
+    /* each card lights up as the pulse reaches it */
+    .card { animation: lift 4.4s ease-in-out infinite; }
+    @keyframes lift {
+      0%, 100% { stroke-opacity: 0.10; }
+      42%      { stroke-opacity: 0.10; }
+      50%      { stroke-opacity: 0.75; }
+      62%      { stroke-opacity: 0.10; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spark { animation: none; stroke-dasharray: none; opacity: 0.35; }
+      .card  { animation: none; stroke-opacity: 0.28; }
+    }
+  </style>
+
+  <rect width="1200" height="250" rx="14" fill="url(#psurface)"/>
+  <rect x="0.5" y="0.5" width="1199" height="249" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.10"/>
+
+  <text class="ink h" x="48" y="48">Stage map</text>
+
+  <!-- rail -->
+  <line x1="48" y1="112" x2="1152" y2="112" stroke="url(#rail)" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <path class="spark" d="M 48,112 L 1152,112"/>
+
+  <!-- six stages, evenly spaced on the rail -->
+  <g class="ink">
+    <!-- 1 -->
+    <circle cx="140" cy="112" r="11" fill="#184f95"/>
+    <circle cx="140" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-4.0s"/>
+    <text class="n" x="140" y="116" text-anchor="middle" fill="#ffffff">1</text>
+    <text class="name" x="140" y="152" text-anchor="middle">Title translation</text>
+    <text class="tool" x="140" y="169" text-anchor="middle">NLLB-200 · fp16</text>
+    <text class="cnt"  x="140" y="188" text-anchor="middle">1,383,600</text>
+
+    <!-- 2 -->
+    <circle cx="342" cy="112" r="11" fill="#20609f"/>
+    <circle cx="342" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-3.3s"/>
+    <text class="n" x="342" y="116" text-anchor="middle" fill="#ffffff">2</text>
+    <text class="name" x="342" y="152" text-anchor="middle">Lexical filter</text>
+    <text class="tool" x="342" y="169" text-anchor="middle">3-tier lexicon · no model</text>
+    <text class="cnt"  x="342" y="188" text-anchor="middle">233,153</text>
+
+    <!-- 3 -->
+    <circle cx="544" cy="112" r="11" fill="#2a78d6"/>
+    <circle cx="544" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-2.6s"/>
+    <text class="n" x="544" y="116" text-anchor="middle" fill="#ffffff">3</text>
+    <text class="name" x="544" y="152" text-anchor="middle">Article translation</text>
+    <text class="tool" x="544" y="169" text-anchor="middle">KV-budgeted · lang-sorted</text>
+    <text class="cnt"  x="544" y="188" text-anchor="middle">233,153</text>
+
+    <!-- 4 -->
+    <circle cx="746" cy="112" r="11" fill="#5598e7"/>
+    <circle cx="746" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-1.9s"/>
+    <text class="n" x="746" y="116" text-anchor="middle">4</text>
+    <text class="name" x="746" y="152" text-anchor="middle">Clean + dedup</text>
+    <text class="tool" x="746" y="169" text-anchor="middle">9 stages · SHA-256</text>
+    <text class="cnt"  x="746" y="188" text-anchor="middle">171,742</text>
+
+    <!-- 5 -->
+    <circle cx="948" cy="112" r="11" fill="#86b6ef"/>
+    <circle cx="948" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-1.2s"/>
+    <text class="n" x="948" y="116" text-anchor="middle">5</text>
+    <text class="name" x="948" y="152" text-anchor="middle">LLM extraction</text>
+    <text class="tool" x="948" y="169" text-anchor="middle">qwen3:14b · JSON · T=0</text>
+    <text class="cnt"  x="948" y="188" text-anchor="middle">28,823</text>
+
+    <!-- 6 -->
+    <circle cx="1122" cy="112" r="11" fill="#cde2fb"/>
+    <circle cx="1122" cy="112" r="11" fill="none" stroke="#ffffff" class="card" style="animation-delay:-0.5s"/>
+    <text class="n" x="1122" y="116" text-anchor="middle">6</text>
+    <text class="name" x="1122" y="152" text-anchor="middle">Flatten to CSV</text>
+    <text class="tool" x="1122" y="169" text-anchor="middle">two-pass schema</text>
+    <text class="cnt"  x="1122" y="188" text-anchor="middle">13,333</text>
+  </g>
+
+  <text class="ink tool" x="48" y="224">Cheap compute early, expensive compute late — the 45-second lexical filter removes 83 % of the corpus before a single GPU hour is spent on full-text translation.</text>
+</svg>
