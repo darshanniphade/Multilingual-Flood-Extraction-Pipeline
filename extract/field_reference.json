@@ -1,0 +1,179 @@
+{
+  "_comment": "How every field in the extraction output is produced. 'source' is code when extract.py/to_csv.py computes it deterministically, and model when qwen3 produces it by following system_prompt.txt. Code fields are reliable; model fields are only as good as the prompt rule quoted in 'rule'.",
+
+  "record": {
+    "_comment": "Top level of each line in <output_root>/<YYYY_MM>.jsonl - one line per article.",
+
+    "article_id": {
+      "source": "code",
+      "type": "string",
+      "rule": "Copied from the input article's article_id field (config input.id_field). Falls back to the filename stem if absent.",
+      "where": "extract.py process_one()",
+      "note": "This is the resume key. already_done() reads it back from the output file and skips those articles on a rerun."
+    },
+
+    "month": {
+      "source": "code",
+      "type": "string",
+      "rule": "The input folder name, YYYY_MM. Not parsed from the article.",
+      "where": "extract.py run_month()",
+      "note": "Measured on a 400-article sample, this disagrees with publish_date about 4% of the time - it is a batch label, not a publication month."
+    },
+
+    "publish_date": {
+      "source": "code",
+      "type": "string (YYYY-MM-DD)",
+      "rule": "Joined from the parallel tree at input.publish_date_root, matching <month>/articles/<article_id>.json, reading input.publish_date_field. Omitted entirely if the file or field is missing.",
+      "where": "extract.py lookup_publish_date()",
+      "note": "Also injected into the model input as a 'PUBLISHED:' line. Measured 100% populated across a 400-article sample."
+    },
+
+    "translated_title": {
+      "source": "code",
+      "type": "string",
+      "rule": "Copied verbatim from the input article. Written only when output.include_title is true.",
+      "where": "extract.py process_one()"
+    },
+
+    "extraction": {
+      "source": "model",
+      "type": "object",
+      "rule": "The model's JSON reply, parsed. Ollama is called with format='json' so it is normally valid JSON; parse_response() additionally strips code fences and takes the outermost {...} if the model wraps it.",
+      "where": "extract.py extract_one() / parse_response()",
+      "note": "The record is written to <month>.failed.jsonl instead if this cannot be parsed after run.retries attempts."
+    }
+  },
+
+  "extraction": {
+    "_comment": "Inside the extraction object. Every field here is produced by the model following system_prompt.txt - none of it is computed by code, and none of it is validated against the article.",
+
+    "contains_flood_event": {
+      "source": "model",
+      "type": "boolean",
+      "rule": "True only if the article describes EXACTLY ONE real flood that has already occurred or is currently occurring. The prompt lists ~20 rejection categories (warning, forecast, future risk, preparedness, mitigation, drainage, cleanup, recovery, insurance, policy, funding, climate discussion, scientific study, historical overview, modelling, multiple unrelated events, ...).",
+      "note": "Two or more unrelated flood events must be rejected, so events is always length 0 or 1."
+    },
+
+    "flood_dates": {
+      "source": "model",
+      "type": "array of YYYY-MM-DD strings",
+      "rule": "Dates on which flooding ACTUALLY occurred. Publication dates, future dates, warning periods, forecasts and vague expressions ('last month', 'recently', 'summer of 2019') are excluded. Sorted ascending, deduplicated. Empty array if no exact date can be determined.",
+      "note": "Most articles write 'Saturday, January 9' with no year. The PUBLISHED: line supplies the year - but the prompt does not currently authorise using it, so year resolution is at the model's discretion and is technically inference.",
+      "validity": "Audited over 11,547 date values: 98.48% are real calendar dates. The remaining 1.52% are not usable as dates - 0.86% month precision ('2021-05-00', day 00), 0.38% not ISO at all ('2021-01'), 0.27% year only ('2020-00-00'), and 2 impossible dates ('2021-02-30', '2021-02-29'). 170 records contain at least one such value. Parse defensively: strptime will raise on all of these."
+    },
+
+    "flooded_locations": {
+      "source": "model",
+      "type": "array of strings",
+      "rule": "Only locations explicitly described as flooded, submerged, underwater or inundated. Excludes warning locations, forecast locations, rainfall-only locations, and places merely preparing for floods. State- and country-level names are excluded unless they are the only location mentioned. Prefers the most specific place available.",
+      "note": "Also leaks into individual event objects (~3,500 occurrences observed) despite being a top-level key. Those nested copies are redundant."
+    },
+
+    "is_verifiable_flood": {
+      "source": "model",
+      "type": "boolean",
+      "rule": "True only if at least one EXACT flood date AND at least one flooded location exist. Otherwise false.",
+      "note": "Audited over 58,101 records: the model matches a naive recomputation of (flood_dates non-empty AND flooded_locations non-empty) 99.80% of the time. Of the 114 disagreements, 113 are cases where the model was RIGHT and the naive check was wrong - flood_dates held a non-exact value like '2021-05-00' (month precision, day 00), which satisfies 'non-empty' but not 'exact'. Do not replace this field with the naive check. To recompute it, validate each date as a real calendar date first."
+    },
+
+    "events": {
+      "source": "model",
+      "type": "array of objects",
+      "rule": "Zero or one event object. Empty when contains_flood_event is false. Each object holds only fields explicitly stated in the article - no nulls, no empty strings, no empty arrays, no invented values.",
+      "note": "The prompt says 'possible fields include', which is an open list. In practice the model has produced ~2,000 field names beyond the ~50 sanctioned ones, carrying about 15% of all extracted values."
+    }
+  },
+
+  "event_fields": {
+    "_comment": "Fields inside an event object. All model-produced, all optional, all present only when explicitly stated in the article. Grouped by the prompt section that governs them.",
+
+    "location": {
+      "fields": ["country", "state", "province", "district", "city", "village", "location", "river", "stream", "lake", "dam", "water_body"],
+      "source": "model",
+      "rule": "Named place or water body as written in the article. Not normalised, not geocoded, not mapped to any gazetteer."
+    },
+
+    "dates": {
+      "fields": ["event_date", "start_date", "end_date"],
+      "source": "model",
+      "rule": "Stated event dates. Distinct from the top-level flood_dates array, which is the deduplicated verified set."
+    },
+
+    "cause": {
+      "fields": ["cause", "trigger", "rainfall_mm"],
+      "source": "model",
+      "rule": "Stated cause or trigger. rainfall_mm only when a millimetre figure is stated - no unit conversion is performed."
+    },
+
+    "water": {
+      "fields": ["water_depth", "water_level", "water_height", "water_unit"],
+      "source": "model",
+      "rule": "Numeric magnitude plus a separate water_unit ('m', 'ft'). Units are never converted.",
+      "note": "The model frequently ignores this split and emits unit-suffixed names instead (water_height_cm, flood_depth_cm, water_level_cm)."
+    },
+
+    "duration": {
+      "fields": ["flood_duration", "duration_unit"],
+      "source": "model",
+      "rule": "Only when duration is explicitly stated. Explicitly must NOT be calculated from start_date and end_date."
+    },
+
+    "casualties_and_people": {
+      "fields": ["affected_people", "evacuated", "displaced", "deaths", "injured", "missing", "affected_people_type", "evacuated_type", "displaced_type", "deaths_type", "injured_type", "missing_type"],
+      "source": "model",
+      "rule": "Each count pairs with a *_type field naming the unit the article used - 'people', 'families', 'households'. The *_type field is omitted when the article does not say.",
+      "note": "A bare count without its *_type is ambiguous: 450 families is not 450 people. Do not sum these columns without checking the paired type."
+    },
+
+    "damage": {
+      "fields": ["houses_damaged", "houses_destroyed", "roads_damaged", "bridges_damaged", "schools_damaged", "hospitals_damaged", "crop_damage", "crop_damage_unit", "livestock_loss", "livestock_loss_type"],
+      "source": "model",
+      "rule": "Counts as stated. crop_damage pairs with crop_damage_unit (hectares, acres); livestock_loss pairs with livestock_loss_type (cattle, goats).",
+      "note": "Often arrives as prose rather than a number ('houses in some barangays were destroyed'), because the prompt requires preserving what the article said. Expect mixed string/number types in these columns."
+    },
+
+    "economic": {
+      "fields": ["economic_loss", "economic_loss_currency"],
+      "source": "model",
+      "rule": "Loss figure plus the currency as written. No conversion, no inflation adjustment, no normalisation of scale words like 'crore' or 'million'."
+    },
+
+    "narrative": {
+      "fields": ["response_agencies", "summary"],
+      "source": "model",
+      "rule": "Agencies named in the article, and a free-text summary.",
+      "note": "The model also emits 'description' for the same concept (~590 times), so summary fill rates understate actual coverage."
+    }
+  },
+
+  "csv_only": {
+    "_comment": "Columns that exist only in the CSV, added by to_csv.py. Not present in the JSONL.",
+
+    "event_index": {
+      "source": "code",
+      "type": "integer or empty",
+      "rule": "Position of the event within the events array. Empty for articles with no event, which still get one row so the CSV accounts for every processed article.",
+      "where": "to_csv.py rows_for()"
+    },
+
+    "extra_fields": {
+      "source": "code",
+      "type": "JSON string",
+      "rule": "With --min-fill N, any event field occurring fewer than N times across the whole scan is written here as a JSON object instead of getting its own column. Nothing is discarded.",
+      "where": "to_csv.py main()",
+      "note": "At --min-fill 20 this folded 1,959 field names into 3,422 preserved values, taking the table from 2,062 columns to 105."
+    },
+
+    "column_order": {
+      "source": "code",
+      "rule": "Identity columns first in fixed order, then event columns sorted by descending fill count with alphabetical tie-breaks, then extra_fields last. Column order is therefore data-dependent and can change between runs as the extraction progresses.",
+      "where": "to_csv.py main()"
+    },
+
+    "list_encoding": {
+      "source": "code",
+      "rule": "Array values are joined with the --sep string (default '; '). Nested objects and mixed-type arrays are written as JSON. Booleans become the strings 'true'/'false'. Files are written UTF-8 with BOM so Excel reads non-ASCII place names correctly.",
+      "where": "to_csv.py cell()"
+    }
+  }
+}

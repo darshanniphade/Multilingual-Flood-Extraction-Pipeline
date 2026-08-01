@@ -1,0 +1,6 @@
+# Flood-news cleaning pipeline -- runtime dependencies.
+# Python 3.12+ required (uses PEP 695 syntax-free typing, StrEnum, slots dataclasses).
+
+orjson>=3.10.0      # fastest JSON parse/serialise; reads bytes directly
+regex>=2024.5.15    # Unicode property classes and variable-width lookbehind
+tqdm>=4.66.0        # progress bars

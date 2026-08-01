@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flood Extraction · ReliefWeb archive</title>
+<style>
+/* ── palette ───────────────────────────────────────────────────────────────
+   Values are the validated reference palette. Only the roles used here are
+   declared. Dark is a selected set of steps for the dark surface, not a flip;
+   it is declared under both the OS media query and the [data-theme] scope so
+   the toggle wins in either direction.                                       */
+:root{
+  color-scheme: light;
+  --surface-1:#fcfcfb; --plane:#f2f2ef;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --hairline:rgba(11,11,11,.10);
+  --series-1:#2a78d6;        /* the one categorical hue: flood signal        */
+  --deemph:#c3c2b7;          /* context / non-flood                          */
+  --ord-1:#86b6ef; --ord-2:#5598e7; --ord-3:#2a78d6; --ord-4:#1c5cab; --ord-5:#104281;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --success-text:#006300;
+  --track:#e9e8e3;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme: dark;
+    --surface-1:#1a1a19; --plane:#0d0d0d;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --hairline:rgba(255,255,255,.10);
+    --series-1:#3987e5; --deemph:#383835;
+    --ord-1:#cde2fb; --ord-2:#86b6ef; --ord-3:#3987e5; --ord-4:#256abf; --ord-5:#184f95;
+    --success-text:#0ca30c;
+    --track:#242422;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --surface-1:#1a1a19; --plane:#0d0d0d;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --hairline:rgba(255,255,255,.10);
+  --series-1:#3987e5; --deemph:#383835;
+  --ord-1:#cde2fb; --ord-2:#86b6ef; --ord-3:#3987e5; --ord-4:#256abf; --ord-5:#184f95;
+  --success-text:#0ca30c;
+  --track:#242422;
+}
+
+*{box-sizing:border-box; margin:0; padding:0}
+body{
+  background:var(--plane); color:var(--ink);
+  font:13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding:16px; min-height:100vh;
+}
+h1{font-size:15px; font-weight:600; letter-spacing:.01em}
+.sub{font-size:12px; color:var(--muted)}
+
+/* ── layout ─────────────────────────────────────────────────────────────── */
+.wrap{max-width:1560px; margin:0 auto; display:flex; flex-direction:column; gap:12px}
+.grid{display:grid; gap:12px}
+.c2{grid-template-columns:1fr 1fr}
+.c3{grid-template-columns:1fr 1fr 1fr}
+.hero-row{grid-template-columns:minmax(260px,1fr) 3fr}
+@media (max-width:1180px){
+  .c2,.c3,.hero-row{grid-template-columns:1fr}
+}
+
+.card{
+  background:var(--surface-1); border:1px solid var(--hairline);
+  border-radius:10px; padding:14px 16px; min-width:0;
+}
+.card h2{
+  font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:2px;
+}
+.card .note{font-size:11.5px; color:var(--muted); margin-bottom:10px}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+header{
+  background:var(--surface-1); border:1px solid var(--hairline); border-radius:10px;
+  padding:12px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.status{
+  display:inline-flex; align-items:center; gap:7px; padding:3px 11px 3px 9px;
+  border-radius:99px; font-size:11.5px; font-weight:600; letter-spacing:.03em;
+  border:1px solid var(--hairline); color:var(--ink-2);
+}
+.status .ic{font-size:12px; line-height:1}
+.status.live .ic{color:var(--good)}
+.status.retry .ic{color:var(--series-1)}
+.status.stalled .ic{color:var(--warning)}
+.status.offline .ic{color:var(--critical)}
+.status.done .ic{color:var(--good)}
+.spacer{flex:1}
+button.ghost{
+  font:inherit; font-size:11.5px; color:var(--ink-2); cursor:pointer;
+  background:none; border:1px solid var(--hairline); border-radius:6px;
+  padding:4px 10px;
+}
+button.ghost:hover{background:var(--plane)}
+
+/* ── hero + meter ───────────────────────────────────────────────────────── */
+.hero .fig{font-size:52px; font-weight:600; line-height:1.05; letter-spacing:-.02em}
+.hero .cap{font-size:12.5px; color:var(--ink-2); margin-top:4px}
+.meter{height:8px; border-radius:4px; background:var(--track); overflow:hidden; margin-top:12px}
+.meter i{display:block; height:100%; width:0; border-radius:4px;
+         background:var(--series-1); transition:width .6s ease}
+
+/* ── stat tiles ─────────────────────────────────────────────────────────── */
+.tiles{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; height:100%}
+@media (max-width:860px){ .tiles{grid-template-columns:repeat(2,1fr)} }
+.tile{background:var(--surface-1); border:1px solid var(--hairline);
+      border-radius:10px; padding:11px 14px; display:flex; flex-direction:column; justify-content:center}
+.tile .l{font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted)}
+.tile .v{font-size:23px; font-weight:600; line-height:1.25; margin-top:2px}
+.tile .d{font-size:11.5px; color:var(--ink-2)}
+
+/* ── charts ─────────────────────────────────────────────────────────────── */
+svg{display:block; width:100%; overflow:visible}
+.gl{stroke:var(--grid); stroke-width:1}
+.ax{stroke:var(--axis); stroke-width:1}
+.tk{fill:var(--muted); font-size:10px; font-variant-numeric:tabular-nums}
+.dl{fill:var(--ink-2); font-size:10.5px; font-weight:600}
+.hit{fill:transparent; cursor:pointer}
+
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-2); margin-bottom:8px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.key{width:10px; height:10px; border-radius:2px; flex:0 0 10px}
+
+/* ── bar lists ──────────────────────────────────────────────────────────── */
+.blist{display:flex; flex-direction:column; gap:7px}
+.brow{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:baseline;
+      font-size:12px; row-gap:3px}
+.brow .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-2)}
+.brow .vl{color:var(--ink); font-variant-numeric:tabular-nums; font-weight:600}
+.brow .tr{grid-column:1/-1; height:6px; border-radius:3px; background:var(--track)}
+.brow .tr i{display:block; height:100%; border-radius:3px; background:var(--series-1);
+            transition:width .5s ease}
+
+/* ── funnel ─────────────────────────────────────────────────────────────── */
+.funnel{display:flex; flex-direction:column; gap:9px}
+.fstep{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:baseline;
+       font-size:12px; row-gap:3px}
+.fstep .nm{color:var(--ink-2)}
+.fstep .vl{color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+.fstep .tr{grid-column:1/-1; height:10px; border-radius:3px; background:var(--track)}
+.fstep .tr i{display:block; height:100%; border-radius:3px; transition:width .5s ease}
+
+/* ── feed ───────────────────────────────────────────────────────────────── */
+.feed{display:flex; flex-direction:column; gap:0; max-height:340px; overflow-y:auto}
+.frow{display:flex; gap:9px; align-items:flex-start; padding:6px 0;
+      border-bottom:1px solid var(--grid); font-size:12px}
+.frow:last-child{border-bottom:none}
+.frow .st{flex:0 0 auto; font-size:11px; line-height:1.5}
+.frow.ok .st{color:var(--good)} .frow.err .st{color:var(--critical)}
+.frow .body{min-width:0; flex:1}
+.frow .ttl{color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.frow.err .ttl{color:var(--critical)}
+.frow .meta{font-size:11px; color:var(--muted); margin-top:1px;
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.chip{display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.06em;
+      padding:1px 6px; border-radius:3px; margin-right:6px; vertical-align:1px;
+      color:var(--surface-1); background:var(--series-1)}
+
+/* ── table ──────────────────────────────────────────────────────────────── */
+.tbox{max-height:420px; overflow:auto}
+table{border-collapse:collapse; width:100%; font-size:12px}
+th,td{padding:5px 10px; text-align:right; white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{position:sticky; top:0; background:var(--surface-1); color:var(--muted);
+         font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         font-weight:600; border-bottom:1px solid var(--axis); z-index:1}
+tbody td{border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums; color:var(--ink-2)}
+tbody td:first-child{color:var(--ink); font-weight:600}
+tbody tr:hover td{background:var(--plane)}
+.sdot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:6px}
+.sdot.done{background:var(--good)} .sdot.running{background:var(--series-1)}
+.sdot.partial{background:var(--warning)} .sdot.queued{background:var(--axis)}
+.sdot.retry{background:var(--series-1); opacity:.55}
+
+.empty{color:var(--muted); font-size:12px; padding:10px 0}
+footer{color:var(--muted); font-size:11px; text-align:center; padding:4px 0 8px}
+
+/* ── tooltip ────────────────────────────────────────────────────────────── */
+#tip{
+  position:fixed; z-index:50; pointer-events:none; opacity:0; transition:opacity .12s;
+  background:var(--surface-1); color:var(--ink); border:1px solid var(--hairline);
+  border-radius:7px; padding:7px 10px; font-size:11.5px; line-height:1.5;
+  box-shadow:0 4px 18px rgba(0,0,0,.18); max-width:280px;
+}
+#tip b{font-weight:600}
+#tip .r{color:var(--ink-2); font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Flood extraction · ReliefWeb archive</h1>
+      <div class="sub" id="meta">connecting…</div>
+    </div>
+    <div class="status offline" id="status"><span class="ic">●</span><span id="statustext">CONNECTING</span></div>
+    <div class="spacer"></div>
+    <button class="ghost" id="theme">Theme</button>
+  </header>
+
+  <!-- hero + KPI row -->
+  <div class="grid hero-row">
+    <div class="card hero">
+      <h2>Corpus processed</h2>
+      <div class="fig" id="heroPct">—</div>
+      <div class="cap" id="heroCap">—</div>
+      <div class="meter"><i id="heroBar"></i></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="l">Throughput</div><div class="v" id="kRate">—</div><div class="d" id="kRateD">reports/s · 60s window</div></div>
+      <div class="tile"><div class="l">Time remaining</div><div class="v" id="kEta">—</div><div class="d" id="kEtaD">at current rate</div></div>
+      <div class="tile"><div class="l">Screened out</div><div class="v" id="kSkip">—</div><div class="d" id="kSkipD">no flood vocabulary</div></div>
+      <div class="tile"><div class="l">Failed</div><div class="v" id="kFail">—</div><div class="d" id="kFailD">after retries</div></div>
+      <div class="tile"><div class="l">Flood reports</div><div class="v" id="kFlood">—</div><div class="d" id="kFloodD">of processed</div></div>
+      <div class="tile"><div class="l">With exact dates</div><div class="v" id="kDated">—</div><div class="d" id="kDatedD">of flood reports</div></div>
+      <div class="tile"><div class="l">Verifiable</div><div class="v" id="kVerif">—</div><div class="d" id="kVerifD">date + location</div></div>
+      <div class="tile"><div class="l">Flood events</div><div class="v" id="kEvents">—</div><div class="d" id="kEventsD">event records</div></div>
+    </div>
+  </div>
+
+  <!-- main charts -->
+  <div class="grid c2">
+    <div class="card">
+      <h2>Reports by <span id="lblUnit">year</span></h2>
+      <div class="note">Stacked: flood reports found within everything processed so far. Bar height is what has been processed, not the corpus total — see the table for coverage.</div>
+      <div class="legend">
+        <span><i class="key" style="background:var(--series-1)"></i>Flood report</span>
+        <span><i class="key" style="background:var(--deemph)"></i>No flood event</span>
+      </div>
+      <svg id="cYears" height="230" role="img" aria-label="Reports processed per year, split by whether a flood event was found"></svg>
+    </div>
+
+    <div class="card">
+      <h2>Throughput</h2>
+      <div class="note">Reports per second, 60-second rolling rate, sampled every 1.5s. Covers this dashboard session only.</div>
+      <svg id="cRate" height="230" role="img" aria-label="Extraction throughput over the dashboard session"></svg>
+    </div>
+  </div>
+
+  <!-- second row -->
+  <div class="grid c3">
+    <div class="card">
+      <h2>Flood seasonality</h2>
+      <div class="note">Month-of-year of every exact flood date the model extracted, pooled across all years.</div>
+      <svg id="cSeason" height="190" role="img" aria-label="Extracted flood dates by month of year"></svg>
+    </div>
+
+    <div class="card">
+      <h2>Extraction funnel</h2>
+      <div class="note">How many reports survive each stage. The prefilter drops documents with no flood vocabulary in any language before the model sees them — validated to keep every flood the model has confirmed.</div>
+      <div class="funnel" id="funnel"><div class="empty">waiting for data…</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Impact fields captured</h2>
+      <div class="note">Most frequently populated event fields, across <span id="evN">0</span> extracted events. Location and date fields excluded.</div>
+      <div class="blist" id="fields"><div class="empty">none yet</div></div>
+    </div>
+  </div>
+
+  <!-- third row -->
+  <div class="grid c3">
+    <div class="card">
+      <h2>Top flooded locations</h2>
+      <div class="note">Place names the model read as flooded, from the report text.</div>
+      <div class="blist" id="locs"><div class="empty">none yet</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Countries of flood reports</h2>
+      <div class="note">The archive's own country tagging on reports found to contain a flood — independent of the text above.</div>
+      <div class="blist" id="countries"><div class="empty">none yet</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Live feed</h2>
+      <div class="note">Most recent reports the model actually read. Prefiltered reports are counted everywhere else but omitted here.</div>
+      <div class="feed" id="feed"><div class="empty">waiting for data…</div></div>
+    </div>
+  </div>
+
+  <!-- table view -->
+  <div class="grid c2">
+    <div class="card">
+      <h2>Coverage by <span id="lblUnit2">year</span></h2>
+      <div class="note">The table view: every number plotted above, readable without colour.</div>
+      <div class="tbox">
+        <table>
+          <thead><tr>
+            <th id="thUnit">Year</th><th>Processed</th><th>In corpus</th><th>Coverage</th>
+            <th>Screened</th><th>Model read</th><th>Floods</th><th>Flood rate</th>
+            <th>Verifiable</th><th>Failed</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="8" class="empty">waiting for data…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Failures</h2>
+      <div class="note">Records written to <code>&lt;part&gt;.failed.jsonl</code> after all retries, grouped by exception type.</div>
+      <div class="blist" id="errors"><div class="empty">no failures</div></div>
+      <h2 style="margin-top:18px">Run</h2>
+      <div class="blist" id="runinfo"></div>
+    </div>
+  </div>
+
+  <footer id="foot">—</footer>
+</div>
+
+<div id="tip"></div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const NUM = n => (n ?? 0).toLocaleString("en-US");
+const PCT = (a, b) => b > 0 ? (100 * a / b).toFixed(1) + "%" : "—";
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function compact(n){
+  if (n == null) return "—";
+  if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M";
+  if (n >= 1e4) return (n / 1e3).toFixed(0) + "K";
+  return NUM(n);
+}
+function dur(s){
+  if (s == null) return "—";
+  s = Math.max(0, s | 0);
+  const d = (s / 86400) | 0, h = ((s % 86400) / 3600) | 0, m = ((s % 3600) / 60) | 0;
+  if (d) return `${d}d ${h}h`;
+  if (h) return `${h}h ${m}m`;
+  return `${m}m ${s % 60}s`;
+}
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ── theme toggle ───────────────────────────────────────────────────────── */
+const saved = localStorage.getItem("webdash-theme");
+if (saved) document.documentElement.dataset.theme = saved;
+$("theme").onclick = () => {
+  const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const now = document.documentElement.dataset.theme || (dark ? "dark" : "light");
+  const next = now === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem("webdash-theme", next);
+  if (latest) render();          // repaint SVGs against the new tokens
+};
+
+/* ── tooltip ────────────────────────────────────────────────────────────── */
+const tip = $("tip");
+function showTip(evt, html){
+  tip.innerHTML = html;
+  tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let x = evt.clientX + 14, y = evt.clientY - r.height - 12;
+  if (x + r.width > innerWidth - 8) x = evt.clientX - r.width - 14;
+  if (y < 8) y = evt.clientY + 18;
+  tip.style.left = x + "px";
+  tip.style.top = y + "px";
+}
+const hideTip = () => { tip.style.opacity = 0; };
+addEventListener("scroll", hideTip, true);
+
+/* ── SVG helpers ────────────────────────────────────────────────────────── */
+const NS = "http://www.w3.org/2000/svg";
+function el(name, attrs, parent){
+  const n = document.createElementNS(NS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+/** Rounded only at the data end (4px), square at the baseline. */
+function barPath(x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w / 2, h));
+  if (h <= 0.5) return "";
+  return `M${x},${y + h}L${x},${y + r}Q${x},${y} ${x + r},${y}`
+       + `L${x + w - r},${y}Q${x + w},${y} ${x + w},${y + r}L${x + w},${y + h}Z`;
+}
+/** Ticks 0..top on clean steps, where top is the first step at or ABOVE max —
+    if the top tick landed below max the marks would overflow the plot. */
+function niceTicks(max, count){
+  if (!(max > 0)) return [0];
+  const raw = max / count, mag = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw) || mag * 10;
+  const top = Math.ceil(max / step) * step;
+  const out = [];
+  for (let v = 0; v <= top + step * 1e-6; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+
+/* ── data polling ───────────────────────────────────────────────────────── */
+let latest = null, offline = true;
+
+async function poll(){
+  try{
+    const r = await fetch("/stats", {cache:"no-store"});
+    if (!r.ok) throw new Error(r.status);
+    latest = await r.json();
+    offline = false;
+  }catch(e){ offline = true; }
+  render();
+}
+setInterval(poll, 2000);
+poll();
+addEventListener("resize", () => { if (latest) render(); });
+
+/* ── render ─────────────────────────────────────────────────────────────── */
+function setStatus(cls, icon, text){
+  $("status").className = "status " + cls;
+  $("status").querySelector(".ic").textContent = icon;
+  $("statustext").textContent = text;
+}
+
+function render(){
+  if (offline || !latest){
+    setStatus("offline", "✕", "OFFLINE");
+    return;
+  }
+  const d = latest, g = d.grand;
+  const finished = g.total > 0 && g.done >= g.total;
+
+  // status carries an icon + label, never colour alone
+  // "retrying" is working-but-not-advancing: the run is re-attempting articles
+  // already counted (a retry that succeeds is ok+1/fail-1), so done cannot move
+  if (finished)      setStatus("done", "✔", "COMPLETE");
+  else if (d.live)   setStatus("live", "●", "RUNNING");
+  else if (d.active) setStatus("retry", "↻", "RETRYING" + (d.since_change != null ? ` · no new articles ${dur(d.since_change)}` : ""));
+  else               setStatus("stalled", "⏸", "IDLE" + (d.since_ingest != null ? ` · ${dur(d.since_ingest)}` : ""));
+
+  const unit = d.label === "year" ? "year" : "month";
+  $("lblUnit").textContent = unit;
+  $("lblUnit2").textContent = unit;
+  $("thUnit").textContent = unit === "year" ? "Year" : "Month";
+  $("meta").textContent =
+    `${d.model} · ${d.workers} workers · ctx ${d.ctx} · ${NUM(g.total)} reports in corpus`;
+
+  // hero
+  $("heroPct").textContent = g.pct.toFixed(2) + "%";
+  $("heroCap").innerHTML = `<b>${NUM(g.done)}</b> of ${NUM(g.total)} reports · `
+    + `${NUM(g.total - g.done)} remaining`;
+  $("heroBar").style.width = Math.min(100, g.pct) + "%";
+
+  // tiles
+  $("kRate").textContent = d.rate_now.toFixed(2);
+  $("kRateD").textContent = `avg ${d.rate_avg.toFixed(2)}/s this session`;
+  $("kEta").textContent = finished ? "done" : dur(d.eta_seconds);
+  $("kEtaD").textContent = finished ? "run complete"
+    : d.eta_seconds == null ? "measuring…" : "at this session's average rate";
+  const scored = g.ok - g.skipped;               // records the model actually read
+  $("kSkip").textContent = compact(g.skipped);
+  $("kSkipD").textContent = g.skipped
+    ? `${PCT(g.skipped, g.ok)} of processed · ${NUM(scored)} model calls`
+    : "prefilter off";
+  $("kFail").textContent = compact(g.fail);
+  $("kFailD").innerHTML = g.fail
+    ? `${PCT(g.fail, g.done)} of processed`
+    : `<span style="color:var(--success-text)">none</span>`;
+  $("kFlood").textContent = compact(g.floods);
+  $("kFloodD").textContent = g.skipped
+    ? `${PCT(g.floods, scored)} of model-read`
+    : `${PCT(g.floods, g.ok)} of processed`;
+  $("kDated").textContent = compact(g.dated);
+  $("kDatedD").textContent = `${PCT(g.dated, g.floods)} of flood reports`;
+  $("kVerif").textContent = compact(g.verifiable);
+  $("kVerifD").textContent = `${PCT(g.verifiable, g.floods)} of flood reports`;
+  $("kEvents").textContent = compact(d.events_total);
+  $("kEventsD").textContent = `${(d.events_total / Math.max(1, g.floods)).toFixed(2)} per flood report`;
+
+  drawYears(d.parts);
+  drawRate(d.rate_history);
+  drawSeason(d.flood_months);
+  drawFunnel(g);
+  barList("fields", d.event_fields, v => NUM(v));
+  $("evN").textContent = NUM(d.events_total);
+  barList("locs", d.locations, v => NUM(v));
+  barList("countries", d.countries, v => NUM(v));
+  barList("errors", d.errors, v => NUM(v), "no failures");
+  drawFeed(d.feed);
+  drawTable(d.parts);
+
+  $("runinfo").innerHTML = [
+    ["Input", d.input_root],
+    ["Output", d.output_root],
+    ["Dashboard uptime", dur(d.uptime)],
+    ["Last write", d.since_change == null ? "—" : dur(d.since_change) + " ago"],
+  ].map(([k, v]) =>
+    `<div class="brow"><span class="nm">${esc(k)}</span>`
+    + `<span class="vl" style="font-weight:500;font-size:11.5px">${esc(v)}</span></div>`
+  ).join("");
+
+  $("foot").textContent =
+    `polling /stats every 2s · tailing ${d.output_root} · nothing here touches the run`;
+}
+
+/* ── chart: stacked columns per partition ───────────────────────────────── */
+function drawYears(parts){
+  const svg = $("cYears");
+  svg.textContent = "";
+  const rows = parts.filter(p => p.total > 0);
+  if (!rows.length) return;
+
+  const W = svg.clientWidth || 600, H = 230;
+  const M = {t:8, r:8, b:26, l:46};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const max = Math.max(...rows.map(p => p.done), 1);
+  const ticks = niceTicks(max, 4);
+  const top = ticks[ticks.length - 1] || max;
+  const y = v => M.t + ih - (v / top) * ih;
+
+  // recessive hairline grid + y ticks
+  for (const t of ticks){
+    el("line", {x1:M.l, x2:M.l + iw, y1:y(t), y2:y(t), class:"gl"}, svg);
+    el("text", {x:M.l - 7, y:y(t) + 3.5, class:"tk", "text-anchor":"end"}, svg)
+      .textContent = compact(t);
+  }
+  el("line", {x1:M.l, x2:M.l + iw, y1:y(0), y2:y(0), class:"ax"}, svg);
+
+  const band = iw / rows.length;
+  const bw = Math.min(24, Math.max(2, band - 2));   // cap thickness, leave air
+  const GAP = 2;                                     // surface gap between segments
+
+  rows.forEach((p, i) => {
+    const cx = M.l + band * i + band / 2;
+    const x = cx - bw / 2;
+    const other = Math.max(0, p.done - p.floods);
+    const hAll = (p.done / top) * ih;
+    const hFl  = (p.floods / top) * ih;
+    const hOt  = Math.max(0, hAll - hFl);
+
+    // Flood sits on the baseline, context stacks above it with a 2px surface gap
+    // between. Only the top of the whole stack carries the 4px data-end radius.
+    const stacked = hOt > 0.5 && hFl > 0.5;
+    if (hOt > 0.5){
+      el("path", {d:barPath(x, y(p.done), bw, hOt - (stacked ? GAP : 0), 4),
+                  fill:"var(--deemph)"}, svg);
+    }
+    if (hFl > 0.5){
+      el("path", {d:barPath(x, y(p.floods), bw, hFl, stacked ? 0 : 4),
+                  fill:"var(--series-1)"}, svg);
+    }
+
+    // oversized transparent hit target - the band, not the bar
+    const hit = el("rect", {x:M.l + band * i, y:M.t, width:band, height:ih, class:"hit"}, svg);
+    hit.addEventListener("mousemove", e => showTip(e,
+      `<b>${esc(p.name)}</b><br>`
+      + `<span class="r">${NUM(p.done)}</span> processed of <span class="r">${NUM(p.total)}</span> `
+      + `(${p.pct}%)<br>`
+      + (p.skipped ? `<span class="r">${NUM(p.skipped)}</span> screened out · `
+                     + `<span class="r">${NUM(p.ok - p.skipped)}</span> read by the model<br>` : "")
+      + `<span class="r">${NUM(p.floods)}</span> flood reports `
+      + `(${PCT(p.floods, p.ok - p.skipped)} of model-read)<br>`
+      + `<span class="r">${NUM(p.verifiable)}</span> verifiable`
+      + (p.fails ? `<br><span class="r">${NUM(p.fails)}</span> failed` : "")));
+    hit.addEventListener("mouseleave", hideTip);
+  });
+
+  // Sparse x labels: a stride, plus the last band. Drop a strided label that
+  // would land on top of the last one rather than letting the two collide.
+  const stride = Math.max(1, Math.ceil(rows.length / 12));
+  const last = rows.length - 1;
+  rows.forEach((p, i) => {
+    const keep = i === last || (i % stride === 0 && last - i >= stride / 2);
+    if (!keep) return;
+    el("text", {x:M.l + band * i + band / 2, y:H - 8, class:"tk", "text-anchor":"middle"}, svg)
+      .textContent = p.name;
+  });
+}
+
+/* ── chart: throughput line + wash ──────────────────────────────────────── */
+function drawRate(hist){
+  const svg = $("cRate");
+  svg.textContent = "";
+  const W = svg.clientWidth || 600, H = 230;
+  const M = {t:8, r:44, b:26, l:46};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+
+  if (!hist || hist.length < 2){
+    el("text", {x:W/2, y:H/2, class:"tk", "text-anchor":"middle"}, svg)
+      .textContent = "collecting samples…";
+    return;
+  }
+  const peak = Math.max(...hist, 0.1);
+  const ticks = niceTicks(peak, 4);
+  const top = ticks[ticks.length - 1] || peak;
+  const x = i => M.l + (i / (hist.length - 1)) * iw;
+  const y = v => M.t + ih - (v / top) * ih;
+
+  for (const t of ticks){
+    el("line", {x1:M.l, x2:M.l + iw, y1:y(t), y2:y(t), class:"gl"}, svg);
+    el("text", {x:M.l - 7, y:y(t) + 3.5, class:"tk", "text-anchor":"end"}, svg)
+      .textContent = t.toFixed(t < 1 ? 2 : 1);
+  }
+  el("line", {x1:M.l, x2:M.l + iw, y1:y(0), y2:y(0), class:"ax"}, svg);
+
+  const line = hist.map((v, i) => `${i ? "L" : "M"}${x(i)},${y(v)}`).join("");
+  el("path", {d:`${line}L${x(hist.length-1)},${y(0)}L${x(0)},${y(0)}Z`,
+              fill:"var(--series-1)", "fill-opacity":".10"}, svg);
+  el("path", {d:line, fill:"none", stroke:"var(--series-1)", "stroke-width":"2",
+              "stroke-linejoin":"round", "stroke-linecap":"round"}, svg);
+
+  // end marker: >=8px, with a 2px surface ring
+  const last = hist[hist.length - 1];
+  el("circle", {cx:x(hist.length-1), cy:y(last), r:4, fill:"var(--series-1)",
+                stroke:"var(--surface-1)", "stroke-width":"2"}, svg);
+  el("text", {x:x(hist.length-1) + 9, y:y(last) + 4, class:"dl"}, svg)
+    .textContent = last.toFixed(2) + "/s";
+
+  el("text", {x:M.l, y:H - 8, class:"tk"}, svg)
+    .textContent = `${Math.round(hist.length * 1.5 / 60)} min ago`;
+  el("text", {x:M.l + iw, y:H - 8, class:"tk", "text-anchor":"end"}, svg)
+    .textContent = "now";
+
+  const hit = el("rect", {x:M.l, y:M.t, width:iw, height:ih, class:"hit"}, svg);
+  hit.addEventListener("mousemove", e => {
+    const bb = svg.getBoundingClientRect();
+    const i = Math.round(((e.clientX - bb.left - M.l) / iw) * (hist.length - 1));
+    const k = Math.max(0, Math.min(hist.length - 1, i));
+    showTip(e, `<b>${hist[k].toFixed(2)} reports/s</b><br>`
+      + `<span class="r">${Math.round((hist.length - 1 - k) * 1.5)}s ago</span>`);
+  });
+  hit.addEventListener("mouseleave", hideTip);
+}
+
+/* ── chart: flood seasonality ───────────────────────────────────────────── */
+function drawSeason(months){
+  const svg = $("cSeason");
+  svg.textContent = "";
+  const W = svg.clientWidth || 400, H = 190;
+  const M = {t:8, r:8, b:24, l:40};
+  const iw = W - M.l - M.r, ih = H - M.t - M.b;
+  const total = months.reduce((a, b) => a + b, 0);
+
+  if (!total){
+    el("text", {x:W/2, y:H/2, class:"tk", "text-anchor":"middle"}, svg)
+      .textContent = "no flood dates extracted yet";
+    return;
+  }
+  const ticks = niceTicks(Math.max(...months), 3);
+  const top = ticks[ticks.length - 1] || 1;
+  const y = v => M.t + ih - (v / top) * ih;
+
+  for (const t of ticks){
+    el("line", {x1:M.l, x2:M.l + iw, y1:y(t), y2:y(t), class:"gl"}, svg);
+    el("text", {x:M.l - 6, y:y(t) + 3.5, class:"tk", "text-anchor":"end"}, svg)
+      .textContent = compact(t);
+  }
+  el("line", {x1:M.l, x2:M.l + iw, y1:y(0), y2:y(0), class:"ax"}, svg);
+
+  const band = iw / 12, bw = Math.min(24, band - 6);
+  const peak = months.indexOf(Math.max(...months));
+  months.forEach((v, i) => {
+    const x = M.l + band * i + (band - bw) / 2;
+    el("path", {d:barPath(x, y(v), bw, (v / top) * ih, 4), fill:"var(--series-1)"}, svg);
+    el("text", {x:M.l + band * i + band / 2, y:H - 7, class:"tk", "text-anchor":"middle"}, svg)
+      .textContent = MONTHS[i][0];
+    // direct-label the extreme only
+    if (i === peak && v > 0){
+      el("text", {x:M.l + band * i + band / 2, y:y(v) - 6, class:"dl", "text-anchor":"middle"}, svg)
+        .textContent = compact(v);
+    }
+    const hit = el("rect", {x:M.l + band * i, y:M.t, width:band, height:ih, class:"hit"}, svg);
+    hit.addEventListener("mousemove", e => showTip(e,
+      `<b>${MONTHS[i]}</b><br><span class="r">${NUM(v)}</span> flood dates `
+      + `(${PCT(v, total)})`));
+    hit.addEventListener("mouseleave", hideTip);
+  });
+}
+
+/* ── funnel (ordinal ramp) ──────────────────────────────────────────────── */
+function drawFunnel(g){
+  const steps = [
+    ["Processed",                  g.done,                "var(--ord-1)"],
+    ["Passed the text prefilter",  g.ok - g.skipped,      "var(--ord-2)"],
+    ["Model found a flood event",  g.floods,              "var(--ord-3)"],
+    ["Has an exact date",          g.dated,               "var(--ord-4)"],
+    ["Verifiable (date + place)",  g.verifiable,          "var(--ord-5)"],
+  ];
+  const base = Math.max(g.done, 1);
+  $("funnel").innerHTML = steps.map(([name, v, fill]) => `
+    <div class="fstep">
+      <span class="nm">${esc(name)}</span>
+      <span class="vl">${NUM(v)} <span style="color:var(--muted);font-weight:400">${PCT(v, base)}</span></span>
+      <span class="tr"><i style="width:${Math.min(100, 100 * v / base)}%;background:${fill}"></i></span>
+    </div>`).join("");
+}
+
+/* ── generic ranked bar list ────────────────────────────────────────────── */
+function barList(id, pairs, fmt, emptyText){
+  const box = $(id);
+  if (!pairs || !pairs.length){
+    box.innerHTML = `<div class="empty">${esc(emptyText || "none yet")}</div>`;
+    return;
+  }
+  const max = pairs[0][1] || 1;
+  box.innerHTML = pairs.map(([name, n]) => `
+    <div class="brow" title="${esc(name)}">
+      <span class="nm">${esc(name)}</span>
+      <span class="vl">${fmt(n)}</span>
+      <span class="tr"><i style="width:${Math.max(1.5, 100 * n / max)}%"></i></span>
+    </div>`).join("");
+}
+
+/* ── live feed ──────────────────────────────────────────────────────────── */
+function drawFeed(feed){
+  const box = $("feed");
+  if (!feed || !feed.length){
+    box.innerHTML = `<div class="empty">waiting for data…</div>`;
+    return;
+  }
+  box.innerHTML = feed.map(f => {
+    const bits = [];
+    if (f.dates && f.dates.length) bits.push(f.dates.join(", "));
+    if (f.locations && f.locations.length) bits.push(f.locations.join(" · "));
+    if (f.country) bits.push(f.country);
+    bits.push(`${f.part} · ${f.id}`);
+    return `<div class="frow ${f.ok ? "ok" : "err"}">
+      <span class="st">${f.ok ? "●" : "✕"}</span>
+      <span class="body">
+        <span class="ttl">${f.flood ? '<span class="chip">FLOOD</span>' : ""}${esc(f.title || "(no title)")}</span>
+        <span class="meta">${esc(bits.join("  ·  "))}</span>
+      </span>
+    </div>`;
+  }).join("");
+}
+
+/* ── table view ─────────────────────────────────────────────────────────── */
+function drawTable(parts){
+  const rows = parts.filter(p => p.total > 0);
+  $("tbody").innerHTML = rows.map(p => {
+    const read = p.ok - p.skipped;
+    return `
+    <tr>
+      <td><span class="sdot ${p.state}"></span>${esc(p.name)}</td>
+      <td>${NUM(p.done)}</td>
+      <td>${NUM(p.total)}</td>
+      <td>${p.pct}%</td>
+      <td>${p.skipped ? NUM(p.skipped) : "—"}</td>
+      <td>${NUM(read)}</td>
+      <td>${NUM(p.floods)}</td>
+      <td>${PCT(p.floods, read)}</td>
+      <td>${NUM(p.verifiable)}</td>
+      <td>${p.fails ? NUM(p.fails) : "—"}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="10" class="empty">waiting for data…</td></tr>`;
+}
+</script>
+</body>
+</html>

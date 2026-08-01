@@ -1,0 +1,1085 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Translation pipeline — live metrics</title>
+<style>
+/* ---------------------------------------------------------------------------
+   Palette. Light and dark are both *selected* steps from the same ramps, not an
+   automatic flip. Dark values are declared under both the OS media query and the
+   data-theme scope so the in-page toggle wins in either direction.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --surface-1:      #fcfcfb;
+  --plane:          #f9f9f7;
+  --text-primary:   #0b0b0b;
+  --text-secondary: #52514e;
+  --muted:          #898781;
+  --grid:           #e1e0d9;
+  --axis:           #c3c2b7;
+  --border:         rgba(11,11,11,0.10);
+  --series-1:       #2a78d6;
+  --series-2:       #eb6834;
+  --series-3:       #1baf7a;
+  --seq-200:        #9ec5f4;
+  --seq-300:        #6da7ec;
+  --seq-450:        #2a78d6;
+  --seq-600:        #184f95;
+  --good:           #0ca30c;
+  --warning:        #fab219;
+  --serious:        #ec835a;
+  --critical:       #d03b3b;
+  --success-text:   #006300;
+  --track:          #eceae4;
+  --ghost:          rgba(11,11,11,0.04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --plane:          #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --muted:          #898781;
+    --grid:           #2c2c2a;
+    --axis:           #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;
+    --series-2:       #d95926;
+    --series-3:       #199e70;
+    --seq-200:        #184f95;
+    --seq-300:        #256abf;
+    --seq-450:        #3987e5;
+    --seq-600:        #86b6ef;
+    --success-text:   #0ca30c;
+    --track:          #2c2c2a;
+    --ghost:          rgba(255,255,255,0.05);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1:      #1a1a19;
+  --plane:          #0d0d0d;
+  --text-primary:   #ffffff;
+  --text-secondary: #c3c2b7;
+  --muted:          #898781;
+  --grid:           #2c2c2a;
+  --axis:           #383835;
+  --border:         rgba(255,255,255,0.10);
+  --series-1:       #3987e5;
+  --series-2:       #d95926;
+  --series-3:       #199e70;
+  --seq-200:        #184f95;
+  --seq-300:        #256abf;
+  --seq-450:        #3987e5;
+  --seq-600:        #86b6ef;
+  --success-text:   #0ca30c;
+  --track:          #2c2c2a;
+  --ghost:          rgba(255,255,255,0.05);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--plane);
+  color: var(--text-primary);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1560px; margin: 0 auto; padding: 20px 20px 64px; }
+
+/* ---- header ------------------------------------------------------------- */
+header { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+h1 { font-size: 19px; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
+.sub { color: var(--text-secondary); font-size: 12.5px; }
+.sub code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11.5px; }
+.spacer { flex: 1 1 auto; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+button, select {
+  font: inherit; font-size: 12.5px; color: var(--text-primary);
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 11px; cursor: pointer;
+}
+button:hover, select:hover { background: var(--ghost); }
+button[aria-pressed="true"] { border-color: var(--series-1); color: var(--series-1); font-weight: 600; }
+
+.pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 5px 12px 5px 10px; font-size: 12.5px; font-weight: 600;
+  background: var(--surface-1);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dot.live { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 22%, transparent); }
+.dot.idle { background: var(--muted); }
+.dot.done { background: var(--series-1); }
+
+/* ---- cards -------------------------------------------------------------- */
+.card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 18px 14px;
+}
+.card h2 {
+  font-size: 13px; font-weight: 650; margin: 0 0 2px; letter-spacing: 0.01em;
+}
+.card .hint { color: var(--muted); font-size: 11.5px; margin: 0 0 12px; }
+.grid { display: grid; gap: 14px; }
+.g-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1080px) { .g-2, .g-3 { grid-template-columns: 1fr; } }
+
+/* ---- hero --------------------------------------------------------------- */
+.hero { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; margin-bottom: 14px; }
+.hero-figure { line-height: 1; }
+.hero-figure .n { font-size: 56px; font-weight: 660; letter-spacing: -0.03em; }
+.hero-figure .u { font-size: 24px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
+.hero-figure .cap { color: var(--text-secondary); font-size: 12.5px; margin-top: 8px; }
+.hero-meter { flex: 1 1 340px; min-width: 260px; }
+
+/* ---- stat tiles --------------------------------------------------------- */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.tile .k { color: var(--text-secondary); font-size: 11.5px; margin-bottom: 5px; }
+.tile .v { font-size: 25px; font-weight: 620; letter-spacing: -0.02em; line-height: 1.15; }
+.tile .v small { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
+.tile .s { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+.tile .s.good { color: var(--success-text); }
+.tile .s.bad { color: var(--critical); }
+
+/* ---- legend ------------------------------------------------------------- */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; }
+.legend .it { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-secondary); }
+.legend .sw { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.legend .n { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---- tables ------------------------------------------------------------- */
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 12px 6px 0; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.wrap-cell { white-space: normal; word-break: break-word; min-width: 260px; }
+tbody tr:last-child td { border-bottom: 0; }
+.data-table { display: none; margin-top: 12px; border-top: 1px solid var(--grid); padding-top: 10px; }
+body.tables .data-table { display: block; }
+
+/* ---- log ---------------------------------------------------------------- */
+pre.log {
+  margin: 0; max-height: 320px; overflow: auto; font-size: 11.5px; line-height: 1.55;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color: var(--text-secondary); background: var(--plane);
+  border: 1px solid var(--grid); border-radius: 10px; padding: 10px 12px;
+}
+.lvl-WARNING { color: var(--warning); }
+.lvl-ERROR, .lvl-CRITICAL { color: var(--critical); }
+
+/* ---- chart chrome ------------------------------------------------------- */
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.empty { color: var(--muted); font-size: 12.5px; padding: 22px 0; text-align: center; }
+#tip {
+  position: fixed; z-index: 40; pointer-events: none; opacity: 0;
+  transition: opacity .1s; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 9px; padding: 8px 11px;
+  font-size: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.16); max-width: 300px;
+}
+#tip .t { font-weight: 650; margin-bottom: 3px; }
+#tip .r { display: flex; align-items: center; gap: 7px; color: var(--text-secondary); }
+#tip .r b { color: var(--text-primary); font-variant-numeric: tabular-nums; margin-left: auto; }
+
+/* ---- facts list --------------------------------------------------------- */
+dl.facts { display: grid; grid-template-columns: auto 1fr; gap: 7px 18px; margin: 0; font-size: 12.5px; }
+dl.facts dt { color: var(--text-secondary); }
+dl.facts dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; word-break: break-word; }
+
+/* Accessible-but-hidden text for icon-only status marks. */
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Flood-article translation — live metrics</h1>
+    <div class="sub" id="subtitle">connecting…</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="controls">
+    <span class="pill" id="state-pill"><span class="dot idle"></span><span id="state-text">—</span></span>
+    <button id="tables-btn" aria-pressed="false" title="Show the numbers behind every chart">Data tables</button>
+    <select id="theme" aria-label="Theme">
+      <option value="auto">Auto theme</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <select id="poll" aria-label="Refresh interval">
+      <option value="5000">Refresh 5s</option>
+      <option value="10000" selected>Refresh 10s</option>
+      <option value="30000">Refresh 30s</option>
+      <option value="0">Paused</option>
+    </select>
+  </div>
+</header>
+
+<!-- ---- hero + progress meter ------------------------------------------- -->
+<section class="card hero" style="margin-bottom:14px">
+  <div class="hero-figure">
+    <span class="n" id="hero-pct">—</span><span class="u">%</span>
+    <div class="cap" id="hero-cap">of the event list translated</div>
+  </div>
+  <div class="hero-meter">
+    <div class="chart" id="meter"></div>
+    <div class="legend" id="meter-legend"></div>
+    <div class="sub" id="inflight" style="margin-top:10px"></div>
+  </div>
+</section>
+
+<!-- ---- KPI tiles -------------------------------------------------------- -->
+<section class="tiles" id="tiles"></section>
+
+<!-- ---- throughput ------------------------------------------------------- -->
+<section class="grid g-2" style="margin-bottom:14px">
+  <div class="card">
+    <h2>Articles per second</h2>
+    <p class="hint">Live rate, differentiated from 10-second counter samples.</p>
+    <div class="chart" id="chart-art"></div>
+    <div class="data-table scroll" id="tbl-art"></div>
+  </div>
+  <div class="card">
+    <h2>Output tokens per second</h2>
+    <p class="hint">Decoder throughput. Separate chart, not a second axis — the two scales are unrelated.</p>
+    <div class="chart" id="chart-tok"></div>
+    <div class="data-table scroll" id="tbl-tok"></div>
+  </div>
+</section>
+
+<!-- ---- languages / months ----------------------------------------------- -->
+<section class="grid g-2" style="margin-bottom:14px">
+  <div class="card">
+    <h2>Articles by source language</h2>
+    <p class="hint">Top 16 of the languages seen so far, by article count.</p>
+    <div class="chart" id="chart-lang"></div>
+    <div class="data-table scroll" id="tbl-lang"></div>
+  </div>
+  <div class="card">
+    <h2>Progress by month</h2>
+    <p class="hint">Completed against the event-list total for each month.</p>
+    <div class="chart" id="chart-month"></div>
+    <div class="data-table scroll" id="tbl-month"></div>
+  </div>
+</section>
+
+<!-- ---- distributions ---------------------------------------------------- -->
+<section class="grid g-3" style="margin-bottom:14px">
+  <div class="card">
+    <h2>Batch size distribution</h2>
+    <p class="hint">GPU batch width at write time, bucketed to 16.</p>
+    <div class="chart" id="chart-batch"></div>
+    <div class="data-table scroll" id="tbl-batch"></div>
+  </div>
+  <div class="card">
+    <h2>Chunks per article</h2>
+    <p class="hint">How many sentence chunks each article split into.</p>
+    <div class="chart" id="chart-chunk"></div>
+    <div class="data-table scroll" id="tbl-chunk"></div>
+  </div>
+  <div class="card">
+    <h2>Language detection source</h2>
+    <p class="hint">Where each article's language came from.</p>
+    <div class="chart" id="chart-langsrc"></div>
+    <div class="data-table scroll" id="tbl-langsrc"></div>
+  </div>
+</section>
+
+<!-- ---- facts ------------------------------------------------------------ -->
+<section class="grid g-3" style="margin-bottom:14px">
+  <div class="card">
+    <h2>GPU &amp; model</h2>
+    <p class="hint">As reported by the running process.</p>
+    <dl class="facts" id="facts-gpu"></dl>
+  </div>
+  <div class="card">
+    <h2>Token economics</h2>
+    <p class="hint">Source vs output tokens across the run.</p>
+    <dl class="facts" id="facts-tok"></dl>
+  </div>
+  <div class="card">
+    <h2>Run configuration</h2>
+    <p class="hint">From the config the run was started with.</p>
+    <dl class="facts" id="facts-cfg"></dl>
+  </div>
+</section>
+
+<!-- ---- blocks ----------------------------------------------------------- -->
+<section class="card" style="margin-bottom:14px">
+  <h2>Recent blocks</h2>
+  <p class="hint">One row per completed block of articles, newest first.</p>
+  <div class="scroll" id="tbl-blocks"></div>
+</section>
+
+<!-- ---- problems --------------------------------------------------------- -->
+<section class="grid g-2" style="margin-bottom:14px">
+  <div class="card">
+    <h2>OOM &amp; batch splits</h2>
+    <p class="hint">Recovered out-of-memory events and the KV budget after each.</p>
+    <div class="scroll" id="tbl-ooms"></div>
+  </div>
+  <div class="card">
+    <h2>Article errors</h2>
+    <p class="hint">Per-article failures, grouped by message class.</p>
+    <div class="scroll" id="tbl-errors"></div>
+  </div>
+</section>
+
+<!-- ---- log -------------------------------------------------------------- -->
+<section class="card">
+  <h2>Log tail</h2>
+  <p class="hint" id="log-hint">Live from the run's log file.</p>
+  <pre class="log" id="log"></pre>
+</section>
+
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ========================================================================== *
+ * Formatting helpers
+ * ========================================================================== */
+const fmt = {
+  int: n => (n == null || !isFinite(n)) ? "—" : Math.round(n).toLocaleString("en-US"),
+  compact(n) {
+    if (n == null || !isFinite(n)) return "—";
+    const a = Math.abs(n);
+    if (a >= 1e9) return (n / 1e9).toFixed(1) + "B";
+    if (a >= 1e6) return (n / 1e6).toFixed(1) + "M";
+    if (a >= 1e3) return (n / 1e3).toFixed(1) + "k";
+    /* Counts are integers and must read as "0", not "0.00"; only fractional
+       values (rates) earn decimal places. */
+    if (Number.isInteger(n)) return String(n);
+    return a >= 100 ? n.toFixed(0) : a >= 10 ? n.toFixed(1) : n.toFixed(2);
+  },
+  pct: (n, d = 1) => (n == null || !isFinite(n)) ? "—" : n.toFixed(d) + "%",
+  dur(s) {
+    if (s == null || !isFinite(s) || s < 0) return "—";
+    s = Math.round(s);
+    const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600),
+          m = Math.floor(s % 3600 / 60), ss = s % 60;
+    if (d) return `${d}d ${h}h`;
+    if (h) return `${h}h ${String(m).padStart(2, "0")}m`;
+    if (m) return `${m}m ${String(ss).padStart(2, "0")}s`;
+    return `${ss}s`;
+  },
+  clock: t => new Date(t * 1000).toLocaleTimeString("en-US",
+            { hour: "2-digit", minute: "2-digit", hour12: false }),
+  when: t => new Date(t * 1000).toLocaleString("en-US", { hour12: false }),
+};
+
+/* NLLB codes are opaque; a name makes the language chart readable. */
+const LANG_NAMES = {
+  eng_Latn: "English", spa_Latn: "Spanish", por_Latn: "Portuguese", fra_Latn: "French",
+  deu_Latn: "German", ita_Latn: "Italian", nld_Latn: "Dutch", rus_Cyrl: "Russian",
+  ukr_Cyrl: "Ukrainian", pol_Latn: "Polish", ces_Latn: "Czech", ron_Latn: "Romanian",
+  tur_Latn: "Turkish", ell_Grek: "Greek", arb_Arab: "Arabic", pes_Arab: "Persian",
+  heb_Hebr: "Hebrew", hin_Deva: "Hindi", ben_Beng: "Bengali", urd_Arab: "Urdu",
+  tam_Taml: "Tamil", tel_Telu: "Telugu", mar_Deva: "Marathi", guj_Gujr: "Gujarati",
+  zho_Hans: "Chinese (S)", zho_Hant: "Chinese (T)", jpn_Jpan: "Japanese",
+  kor_Hang: "Korean", vie_Latn: "Vietnamese", tha_Thai: "Thai", ind_Latn: "Indonesian",
+  zsm_Latn: "Malay", tgl_Latn: "Tagalog", swh_Latn: "Swahili", hun_Latn: "Hungarian",
+  swe_Latn: "Swedish", dan_Latn: "Danish", nob_Latn: "Norwegian", fin_Latn: "Finnish",
+  bul_Cyrl: "Bulgarian", srp_Cyrl: "Serbian", hrv_Latn: "Croatian", slk_Latn: "Slovak",
+  slv_Latn: "Slovenian", lit_Latn: "Lithuanian", lvs_Latn: "Latvian", est_Latn: "Estonian",
+  cat_Latn: "Catalan", glg_Latn: "Galician", eus_Latn: "Basque", isl_Latn: "Icelandic",
+  npi_Deva: "Nepali", sin_Sinh: "Sinhala", mya_Mymr: "Burmese", khm_Khmr: "Khmer",
+  lao_Laoo: "Lao", amh_Ethi: "Amharic", som_Latn: "Somali", hau_Latn: "Hausa",
+  yor_Latn: "Yoruba", ibo_Latn: "Igbo", afr_Latn: "Afrikaans", kat_Geor: "Georgian",
+  hye_Armn: "Armenian", azj_Latn: "Azerbaijani", kaz_Cyrl: "Kazakh", uzn_Latn: "Uzbek",
+  und: "Undetermined",
+};
+const langLabel = c => LANG_NAMES[c] ? `${LANG_NAMES[c]}` : (c || "—");
+
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, kids = []) => {
+  const n = document.createElementNS(
+    ["svg","g","rect","path","line","circle","text","clipPath","defs","polyline"].includes(tag)
+      ? "http://www.w3.org/2000/svg" : "http://www.w3.org/1999/xhtml", tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === "text") n.textContent = v; else n.setAttribute(k, v);
+  }
+  for (const k of [].concat(kids)) if (k) n.appendChild(k);
+  return n;
+};
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ========================================================================== *
+ * Tooltip (one shared node; charts push rows into it)
+ * ========================================================================== */
+const tip = $("#tip");
+function showTip(ev, title, rows) {
+  tip.innerHTML = "";
+  tip.appendChild(el("div", { class: "t", text: title }));
+  for (const r of rows) {
+    const row = el("div", { class: "r" });
+    if (r.color) {
+      const sw = el("span", { class: "sw" });
+      sw.style.cssText = `width:9px;height:9px;border-radius:3px;background:${r.color};flex:none`;
+      row.appendChild(sw);
+    }
+    row.appendChild(el("span", { text: r.label }));
+    row.appendChild(el("b", { text: r.value }));
+    tip.appendChild(row);
+  }
+  tip.style.opacity = "1";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = Math.max(8, x) + "px";
+  tip.style.top = Math.max(8, y) + "px";
+}
+const hideTip = () => { tip.style.opacity = "0"; };
+addEventListener("scroll", hideTip, { passive: true });
+
+/* ========================================================================== *
+ * Chart mounting: re-render on width change so SVG text never scales.
+ * ========================================================================== */
+const mounted = new Map();
+function mount(sel, render) {
+  const node = typeof sel === "string" ? $(sel) : sel;
+  if (!node) return;
+  mounted.set(node, render);
+  draw(node);
+  if (!node.__ro) {
+    node.__ro = new ResizeObserver(() => draw(node));
+    node.__ro.observe(node);
+  }
+}
+function draw(node) {
+  const render = mounted.get(node);
+  if (!render) return;
+  const w = node.clientWidth || 600;
+  if (w < 40) return;
+  node.innerHTML = "";
+  const out = render(w);
+  if (out) node.appendChild(out);
+}
+const redrawAll = () => mounted.forEach((_, n) => draw(n));
+addEventListener("resize", () => requestAnimationFrame(redrawAll));
+
+function emptyNote(msg) {
+  return el("div", { class: "empty", text: msg });
+}
+
+/* ========================================================================== *
+ * Chart: line / area with crosshair + tooltip
+ * ========================================================================== */
+function lineChart(pts, opts = {}) {
+  return (W) => {
+    if (!pts || pts.length < 2) return emptyNote(opts.empty || "Waiting for samples…");
+    const H = opts.height || 190;
+    const m = { t: 14, r: 14, b: 26, l: 52 };
+    const iw = Math.max(10, W - m.l - m.r), ih = H - m.t - m.b;
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const yMax = Math.max(...ys, opts.minMax || 0) * 1.12 || 1;
+    const X = v => m.l + (x1 === x0 ? iw : (v - x0) / (x1 - x0) * iw);
+    const Y = v => m.t + ih - (v / yMax) * ih;
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H,
+                            role: "img", "aria-label": opts.aria || opts.label || "line chart" });
+
+    /* recessive grid + y ticks */
+    const ticks = 4;
+    for (let i = 0; i <= ticks; i++) {
+      const v = yMax * i / ticks, y = Y(v);
+      svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y,
+        stroke: css("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: m.l - 8, y: y + 4, "text-anchor": "end",
+        fill: css("--muted"), "font-size": 11, "font-variant-numeric": "tabular-nums",
+        text: fmt.compact(v) }));
+    }
+    /* x ticks: first / middle / last */
+    for (const p of [pts[0], pts[Math.floor(pts.length / 2)], pts[pts.length - 1]]) {
+      svg.appendChild(el("text", { x: X(p.x), y: H - 7, "text-anchor": "middle",
+        fill: css("--muted"), "font-size": 11, text: fmt.clock(p.x) }));
+    }
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih,
+      stroke: css("--axis"), "stroke-width": 1 }));
+
+    const color = opts.color || css("--series-1");
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join(" ");
+    const area = `${d} L${X(pts[pts.length - 1].x).toFixed(1)},${m.t + ih} L${X(pts[0].x).toFixed(1)},${m.t + ih} Z`;
+    svg.appendChild(el("path", { d: area, fill: color, opacity: 0.10 }));
+    svg.appendChild(el("path", { d, fill: "none", stroke: color, "stroke-width": 2,
+      "stroke-linejoin": "round", "stroke-linecap": "round" }));
+
+    /* average reference line — a quiet second read on the same axis */
+    const avg = ys.reduce((a, b) => a + b, 0) / ys.length;
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: Y(avg), y2: Y(avg),
+      stroke: css("--muted"), "stroke-width": 1, "stroke-dasharray": "4 4", opacity: .8 }));
+    svg.appendChild(el("text", { x: W - m.r, y: Y(avg) - 6, "text-anchor": "end",
+      fill: css("--muted"), "font-size": 11, text: `avg ${fmt.compact(avg)}` }));
+
+    /* last point marker + direct label (selective labelling, not every point) */
+    const last = pts[pts.length - 1];
+    svg.appendChild(el("circle", { cx: X(last.x), cy: Y(last.y), r: 4.5, fill: color,
+      stroke: css("--surface-1"), "stroke-width": 2 }));
+
+    /* crosshair layer */
+    const cross = el("line", { x1: 0, x2: 0, y1: m.t, y2: m.t + ih,
+      stroke: css("--axis"), "stroke-width": 1, opacity: 0 });
+    const dot = el("circle", { r: 4.5, fill: color, stroke: css("--surface-1"),
+      "stroke-width": 2, opacity: 0 });
+    svg.appendChild(cross); svg.appendChild(dot);
+    const hit = el("rect", { x: m.l, y: m.t, width: iw, height: ih, fill: "transparent" });
+    hit.style.cursor = "crosshair";
+    hit.addEventListener("mousemove", ev => {
+      const r = svg.getBoundingClientRect();
+      const px = (ev.clientX - r.left) * (W / r.width);
+      let best = 0, bd = Infinity;
+      pts.forEach((p, i) => { const dd = Math.abs(X(p.x) - px); if (dd < bd) { bd = dd; best = i; } });
+      const p = pts[best];
+      cross.setAttribute("x1", X(p.x)); cross.setAttribute("x2", X(p.x));
+      cross.setAttribute("opacity", 1);
+      dot.setAttribute("cx", X(p.x)); dot.setAttribute("cy", Y(p.y));
+      dot.setAttribute("opacity", 1);
+      showTip(ev, fmt.clock(p.x), [
+        { color, label: opts.label || "value", value: fmt.compact(p.y) + (opts.unit || "") },
+        ...(p.extra || []),
+      ]);
+    });
+    hit.addEventListener("mouseleave", () => {
+      cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); hideTip();
+    });
+    svg.appendChild(hit);
+    return svg;
+  };
+}
+
+/* ========================================================================== *
+ * Chart: ranked horizontal bars (one measure -> one hue)
+ * ========================================================================== */
+function rankedBars(items, opts = {}) {
+  return (W) => {
+    if (!items || !items.length) return emptyNote(opts.empty || "No data yet.");
+    const rowH = opts.rowH || 24, labelW = opts.labelW || 132, valueW = 72;
+    const H = items.length * rowH + 6;
+    const iw = Math.max(20, W - labelW - valueW);
+    const max = Math.max(...items.map(i => i.value)) || 1;
+    const color = opts.color || css("--series-1");
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H,
+                            role: "img", "aria-label": opts.aria || "ranked bar chart" });
+    items.forEach((it, i) => {
+      const y = i * rowH, bh = 13;
+      const bw = Math.max(2, it.value / max * iw);
+      svg.appendChild(el("text", { x: labelW - 10, y: y + bh + 2, "text-anchor": "end",
+        fill: css("--text-secondary"), "font-size": 12, text: it.label }));
+      svg.appendChild(el("rect", { x: labelW, y: y + 3, width: iw, height: bh,
+        rx: 4, fill: css("--track"), opacity: .55 }));
+      const bar = el("rect", { x: labelW, y: y + 3, width: bw, height: bh, rx: 4, fill: color });
+      svg.appendChild(bar);
+      svg.appendChild(el("text", { x: labelW + iw + 8, y: y + bh + 2, "text-anchor": "start",
+        fill: css("--text-primary"), "font-size": 12, "font-variant-numeric": "tabular-nums",
+        text: opts.format ? opts.format(it.value) : fmt.compact(it.value) }));
+      const hit = el("rect", { x: 0, y, width: W, height: rowH, fill: "transparent" });
+      hit.addEventListener("mousemove", ev => showTip(ev, it.label,
+        (it.rows || [{ color, label: opts.label || "articles", value: fmt.int(it.value) }])));
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+    });
+    return svg;
+  };
+}
+
+/* ========================================================================== *
+ * Chart: columns (histogram)
+ * ========================================================================== */
+function columnChart(items, opts = {}) {
+  return (W) => {
+    if (!items || !items.length) return emptyNote(opts.empty || "No data yet.");
+    const H = opts.height || 180, m = { t: 12, r: 8, b: 34, l: 44 };
+    const iw = Math.max(20, W - m.l - m.r), ih = H - m.t - m.b;
+    const max = Math.max(...items.map(i => i.value)) || 1;
+    const gap = 2, bw = Math.max(3, iw / items.length - gap);
+    const color = opts.color || css("--series-1");
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H,
+                            role: "img", "aria-label": opts.aria || "column chart" });
+    for (let i = 0; i <= 3; i++) {
+      const y = m.t + ih - ih * i / 3;
+      svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: y, y2: y,
+        stroke: css("--grid"), "stroke-width": 1 }));
+      svg.appendChild(el("text", { x: m.l - 7, y: y + 4, "text-anchor": "end",
+        fill: css("--muted"), "font-size": 10.5, "font-variant-numeric": "tabular-nums",
+        text: fmt.compact(max * i / 3) }));
+    }
+    items.forEach((it, i) => {
+      const x = m.l + i * (bw + gap);
+      const h = Math.max(2, it.value / max * ih);
+      svg.appendChild(el("rect", { x, y: m.t + ih - h, width: bw, height: h,
+        rx: 4, fill: color }));
+      /* Anchor the rounded end to the baseline: square off the bottom 4px. */
+      svg.appendChild(el("rect", { x, y: m.t + ih - Math.min(h, 4), width: bw,
+        height: Math.min(h, 4), fill: color }));
+      if (items.length <= 14 || i % 2 === 0) {
+        svg.appendChild(el("text", { x: x + bw / 2, y: H - 18, "text-anchor": "middle",
+          fill: css("--muted"), "font-size": 10.5, text: it.label }));
+      }
+      const hit = el("rect", { x, y: m.t, width: bw + gap, height: ih, fill: "transparent" });
+      hit.addEventListener("mousemove", ev => showTip(ev, it.tipTitle || it.label,
+        [{ color, label: opts.label || "count", value: fmt.int(it.value) },
+         ...(it.rows || [])]));
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+    });
+    svg.appendChild(el("line", { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih,
+      stroke: css("--axis"), "stroke-width": 1 }));
+    if (opts.axisLabel) {
+      svg.appendChild(el("text", { x: m.l + iw / 2, y: H - 3, "text-anchor": "middle",
+        fill: css("--muted"), "font-size": 10.5, text: opts.axisLabel }));
+    }
+    return svg;
+  };
+}
+
+/* ========================================================================== *
+ * Chart: single stacked bar (composition) with 2px surface gaps
+ * ========================================================================== */
+function stackedBar(segs, opts = {}) {
+  return (W) => {
+    const total = segs.reduce((a, s) => a + s.value, 0);
+    const H = opts.height || 30;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H,
+                            role: "img", "aria-label": opts.aria || "composition bar" });
+    svg.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, rx: 6, fill: css("--track") }));
+    if (!total) return svg;
+    let x = 0;
+    segs.forEach((s, i) => {
+      if (!s.value) return;
+      const w = Math.max(2, s.value / total * W);
+      const gap = i === segs.length - 1 ? 0 : 2;   /* surface gap between fills */
+      svg.appendChild(el("rect", { x, y: 0, width: Math.max(2, w - gap), height: H,
+        rx: 6, fill: s.color }));
+      const hit = el("rect", { x, y: 0, width: w, height: H, fill: "transparent" });
+      hit.addEventListener("mousemove", ev => showTip(ev, s.label, [
+        { color: s.color, label: "articles", value: fmt.int(s.value) },
+        { label: "share", value: fmt.pct(100 * s.value / total) },
+      ]));
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+      x += w;
+    });
+    return svg;
+  };
+}
+
+/* ========================================================================== *
+ * Chart: month progress rows (track + fill + % label)
+ * ========================================================================== */
+function progressRows(items, opts = {}) {
+  return (W) => {
+    if (!items || !items.length) return emptyNote("No months resolved yet.");
+    const rowH = 26, labelW = 74, valueW = 108;
+    const H = items.length * rowH + 4;
+    const iw = Math.max(20, W - labelW - valueW);
+    const color = opts.color || css("--series-1");
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H,
+                            role: "img", "aria-label": "progress by month" });
+    items.forEach((it, i) => {
+      const y = i * rowH, bh = 14;
+      const pct = it.total ? it.done / it.total : 0;
+      svg.appendChild(el("text", { x: 0, y: y + bh + 2, fill: css("--text-secondary"),
+        "font-size": 12, text: it.label }));
+      svg.appendChild(el("rect", { x: labelW, y: y + 3, width: iw, height: bh,
+        rx: 4, fill: css("--track") }));
+      /* No fill at all at zero -- a 2px minimum nub reads as "started". */
+      if (pct > 0) {
+        svg.appendChild(el("rect", { x: labelW, y: y + 3, width: Math.max(3, pct * iw),
+          height: bh, rx: 4, fill: color }));
+      }
+      svg.appendChild(el("text", { x: W, y: y + bh + 2, "text-anchor": "end",
+        fill: css("--text-primary"), "font-size": 12, "font-variant-numeric": "tabular-nums",
+        text: `${fmt.compact(it.done)} / ${fmt.compact(it.total)}` }));
+      const hit = el("rect", { x: 0, y, width: W, height: rowH, fill: "transparent" });
+      hit.addEventListener("mousemove", ev => showTip(ev, it.label, [
+        { color, label: "translated", value: fmt.int(it.done) },
+        { label: "in event list", value: fmt.int(it.total) },
+        { label: "complete", value: fmt.pct(pct * 100) },
+      ]));
+      hit.addEventListener("mouseleave", hideTip);
+      svg.appendChild(hit);
+    });
+    return svg;
+  };
+}
+
+/* ========================================================================== *
+ * Plain-HTML builders
+ * ========================================================================== */
+function table(cols, rows) {
+  const t = el("table");
+  const thead = el("thead");
+  const tr = el("tr");
+  cols.forEach(c => tr.appendChild(el("th", { class: c.num ? "num" : null, text: c.label })));
+  thead.appendChild(tr); t.appendChild(thead);
+  const tb = el("tbody");
+  rows.forEach(r => {
+    const row = el("tr");
+    cols.forEach(c => {
+      const cls = [c.num ? "num" : "", c.wrap ? "wrap-cell" : ""].filter(Boolean).join(" ");
+      row.appendChild(el("td", { class: cls || null, text: String(r[c.key] ?? "—") }));
+    });
+    tb.appendChild(row);
+  });
+  t.appendChild(tb);
+  return t;
+}
+function setTable(sel, cols, rows, empty) {
+  const node = $(sel); if (!node) return;
+  node.innerHTML = "";
+  node.appendChild(rows.length ? table(cols, rows) : emptyNote(empty || "Nothing recorded yet."));
+}
+function facts(sel, pairs) {
+  const node = $(sel); if (!node) return;
+  node.innerHTML = "";
+  for (const [k, v] of pairs) {
+    node.appendChild(el("dt", { text: k }));
+    node.appendChild(el("dd", { text: v == null || v === "" ? "—" : String(v) }));
+  }
+}
+function tile(k, v, unit, sub, cls) {
+  const t = el("div", { class: "tile" });
+  t.appendChild(el("div", { class: "k", text: k }));
+  const val = el("div", { class: "v", text: v });
+  if (unit) val.appendChild(el("small", { text: " " + unit }));
+  t.appendChild(val);
+  if (sub) t.appendChild(el("div", { class: "s" + (cls ? " " + cls : ""), text: sub }));
+  return t;
+}
+
+/* ========================================================================== *
+ * Derivation: counter samples -> smoothed rate series
+ * ========================================================================== */
+function rateSeries(samples, key, smooth = 3) {
+  const raw = [];
+  for (let i = 1; i < samples.length; i++) {
+    const dt = samples[i].t - samples[i - 1].t;
+    if (dt <= 0) continue;
+    const dv = samples[i][key] - samples[i - 1][key];
+    if (dv < 0) continue;                       /* counter reset (--no-resume) */
+    if (dt > 600) continue;                     /* gap: the run was stopped */
+    raw.push({ x: samples[i].t, y: dv / dt });
+  }
+  if (smooth < 2 || raw.length < smooth) return raw;
+  const out = [];
+  for (let i = 0; i < raw.length; i++) {
+    const a = Math.max(0, i - smooth + 1);
+    const win = raw.slice(a, i + 1);
+    out.push({ x: raw[i].x, y: win.reduce((s, p) => s + p.y, 0) / win.length });
+  }
+  return out;
+}
+
+/* ========================================================================== *
+ * Render
+ * ========================================================================== */
+const STATUS_META = [
+  { key: "ok",              label: "Translated",     v: "--series-1" },
+  { key: "skipped_english", label: "English, copied", v: "--series-3" },
+  { key: "failed",          label: "Failed",         v: "--critical", icon: "✕" },
+  { key: "corrupt",         label: "Corrupt",        v: "--serious",  icon: "!" },
+];
+
+let LAST = null;
+
+function render(d) {
+  LAST = d;
+  if (d.error) { $("#subtitle").textContent = "error: " + d.error; return; }
+
+  const p = d.progress, s = d.status, r = d.rates, g = d.gpu, tk = d.tokens, c = d.config;
+  const proc = d.process || {}, inf = d.in_flight, bc = d.block_counts || {};
+
+  /* ---- header ---------------------------------------------------------- */
+  $("#subtitle").innerHTML =
+    `<code>${c.output_dir || ""}</code> &nbsp;·&nbsp; ${c.model || ""} ` +
+    `&nbsp;·&nbsp; updated ${fmt.when(d.generated_at)}`;
+  const running = r.running, done = p.total > 0 && p.remaining === 0;
+  const pill = $("#state-pill .dot"), txt = $("#state-text");
+  pill.className = "dot " + (done ? "done" : running ? "live" : "idle");
+  txt.textContent = done ? "Complete" : running ? "Running" : "Idle";
+
+  /* ---- hero ------------------------------------------------------------ */
+  $("#hero-pct").textContent = p.total ? p.percent.toFixed(2) : "—";
+  $("#hero-cap").textContent =
+    `${fmt.int(p.completed)} of ${fmt.int(p.total)} articles · ${fmt.int(p.remaining)} remaining`;
+
+  const segs = STATUS_META.map(m => ({ label: m.label, value: s[m.key] || 0, color: css(m.v) }));
+  mount("#meter", stackedBar(segs, { height: 30, aria: "outcome composition" }));
+  const legend = $("#meter-legend"); legend.innerHTML = "";
+  STATUS_META.forEach(m => {
+    const it = el("span", { class: "it" });
+    const sw = el("span", { class: "sw" }); sw.style.background = css(m.v);
+    it.appendChild(sw);
+    it.appendChild(el("span", { text: (m.icon ? m.icon + " " : "") + m.label }));
+    it.appendChild(el("span", { class: "n", text: fmt.int(s[m.key] || 0) }));
+    legend.appendChild(it);
+  });
+
+  /* Mid-block the run writes nothing for tens of minutes; say so explicitly
+     rather than letting a frozen percentage read as a stall. */
+  const infNode = $("#inflight");
+  if (inf) {
+    const when = inf.finish_at
+      ? `about <strong>${fmt.dur(inf.remaining_seconds)}</strong> left (~${fmt.clock(inf.finish_at)})`
+      : "no estimate yet — needs one finished block";
+    infNode.innerHTML =
+      `<strong>Block ${inf.index} in flight</strong>, ${fmt.dur(inf.elapsed)} in — ` +
+      `${fmt.compact(inf.chunks)} chunks · ${inf.langs} languages · ${fmt.int(inf.batches)} batches · ` +
+      `widest ${inf.max}. Progress is checkpointed per block, so every counter below ` +
+      `holds still until this one lands: ${when}.`;
+  } else if (bc.done) {
+    infNode.textContent = `${fmt.int(bc.done)} block(s) finished · no block currently in flight.`;
+  } else {
+    infNode.textContent = proc.alive
+      ? "Starting up — indexing and loading the model."
+      : "No block has started yet.";
+  }
+
+  /* ---- tiles ----------------------------------------------------------- */
+  const tiles = $("#tiles"); tiles.innerHTML = "";
+  tiles.appendChild(tile("Articles done", fmt.compact(p.completed), "",
+    `${fmt.int(p.remaining)} to go`));
+  tiles.appendChild(tile("Block rate", fmt.compact(r.avg_art_per_s), "art/s",
+    bc.measured ? `over ${fmt.int(bc.measured)} finished block(s)` : "no finished block yet"));
+  tiles.appendChild(tile("Decode rate", fmt.compact(r.out_tok_per_s), "tok/s",
+    `GPU avg ${fmt.compact(r.avg_out_tok_per_s)} tok/s`));
+  tiles.appendChild(tile("ETA", fmt.dur(r.eta_seconds), "",
+    r.eta_seconds ? "at the measured block rate" : (done ? "finished" : "waiting for a block")));
+  tiles.appendChild(tile("Elapsed", fmt.dur(r.elapsed_seconds), "",
+    r.finished_in ? "run complete in " + r.finished_in : "since this run started"));
+  tiles.appendChild(tile("GPU busy", g.busy_percent == null ? "—" : fmt.pct(g.busy_percent, 0), "",
+    `${fmt.dur(g.seconds)} on GPU this session`));
+  tiles.appendChild(tile("Peak VRAM", (g.peak_gib || 0).toFixed(2), "GiB",
+    `target ${g.target_gib ?? "—"} GiB`));
+  tiles.appendChild(tile("OOM splits", fmt.int(g.oom_count), "",
+    g.oom_count ? "all recovered" : "none", g.oom_count ? "bad" : "good"));
+  tiles.appendChild(tile("English copied", fmt.compact(s.skipped_english), "",
+    "passed through, not translated"));
+  tiles.appendChild(tile("Failed", fmt.compact(s.failed + s.corrupt), "",
+    `${fmt.int(s.failed)} failed · ${fmt.int(s.corrupt)} corrupt`,
+    (s.failed + s.corrupt) ? "bad" : "good"));
+  tiles.appendChild(tile("Output tokens", fmt.compact(tk.out), "",
+    `${fmt.compact(tk.src)} source tokens`));
+  tiles.appendChild(tile("Files written", fmt.compact(s.written), "",
+    "JSON documents on disk"));
+
+  /* ---- throughput ------------------------------------------------------ */
+  const artPts = rateSeries(d.samples, "articles").length >= 2
+    ? rateSeries(d.samples, "articles") : rateSeries(d.samples, "completed");
+  mount("#chart-art", lineChart(artPts, { label: "articles/s", color: css("--series-1"),
+    aria: "articles per second over time" }));
+  setTable("#tbl-art", [{ key: "time", label: "Time" }, { key: "rate", label: "art/s", num: true }],
+    artPts.slice(-40).reverse().map(p => ({ time: fmt.clock(p.x), rate: p.y.toFixed(2) })));
+
+  const tokPts = rateSeries(d.samples, "out_tokens");
+  mount("#chart-tok", lineChart(tokPts, { label: "out tok/s", color: css("--series-2"),
+    aria: "output tokens per second over time" }));
+  setTable("#tbl-tok", [{ key: "time", label: "Time" }, { key: "rate", label: "out tok/s", num: true }],
+    tokPts.slice(-40).reverse().map(p => ({ time: fmt.clock(p.x), rate: fmt.int(p.y) })));
+
+  /* ---- languages ------------------------------------------------------- */
+  const langs = (d.languages || []).slice(0, 16).map(l => ({
+    label: langLabel(l.lang), value: l.articles,
+    rows: [
+      { color: css("--series-1"), label: "articles", value: fmt.int(l.articles) },
+      { label: "code", value: l.lang },
+      { label: "source tokens", value: fmt.compact(l.src_tokens) },
+    ],
+  }));
+  mount("#chart-lang", rankedBars(langs, { label: "articles",
+    aria: "articles by source language" }));
+  setTable("#tbl-lang",
+    [{ key: "lang", label: "Language" }, { key: "code", label: "Code" },
+     { key: "articles", label: "Articles", num: true }, { key: "tok", label: "Src tokens", num: true }],
+    (d.languages || []).map(l => ({ lang: langLabel(l.lang), code: l.lang,
+      articles: fmt.int(l.articles), tok: fmt.int(l.src_tokens) })));
+
+  /* ---- months ---------------------------------------------------------- */
+  const months = (d.months || []).map(m => ({ label: m.month, done: m.done, total: m.total }));
+  mount("#chart-month", progressRows(months));
+  setTable("#tbl-month",
+    [{ key: "month", label: "Month" }, { key: "done", label: "Done", num: true },
+     { key: "total", label: "Total", num: true }, { key: "pct", label: "%", num: true },
+     { key: "ok", label: "Translated", num: true }, { key: "eng", label: "English", num: true },
+     { key: "failed", label: "Failed", num: true }, { key: "corrupt", label: "Corrupt", num: true }],
+    (d.months || []).map(m => ({ month: m.month, done: fmt.int(m.done), total: fmt.int(m.total),
+      pct: m.total ? (100 * m.done / m.total).toFixed(1) : "—", ok: fmt.int(m.ok),
+      eng: fmt.int(m.skipped_english), failed: fmt.int(m.failed), corrupt: fmt.int(m.corrupt) })));
+
+  /* ---- distributions --------------------------------------------------- */
+  const batches = (d.batch_sizes || []).map(b => ({
+    label: String(b.bucket), value: b.count, tipTitle: `batch ${b.bucket}–${b.bucket + 15}` }));
+  mount("#chart-batch", columnChart(batches, { label: "articles", axisLabel: "batch size",
+    aria: "batch size distribution" }));
+  setTable("#tbl-batch", [{ key: "bucket", label: "Batch size" }, { key: "count", label: "Articles", num: true }],
+    batches.map(b => ({ bucket: b.tipTitle, count: fmt.int(b.value) })));
+
+  const chunks = (d.chunk_hist || []).map(c2 => ({ label: c2.bucket, value: c2.count }));
+  mount("#chart-chunk", columnChart(chunks, { label: "articles", axisLabel: "chunks",
+    color: css("--series-3"), aria: "chunks per article" }));
+  setTable("#tbl-chunk", [{ key: "bucket", label: "Chunks" }, { key: "count", label: "Articles", num: true }],
+    chunks.map(c2 => ({ bucket: c2.label, count: fmt.int(c2.value) })));
+
+  const srcs = Object.entries(d.lang_sources || {})
+    .sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ label: k, value: v }));
+  mount("#chart-langsrc", rankedBars(srcs, { labelW: 92, label: "articles",
+    aria: "language detection source" }));
+  setTable("#tbl-langsrc", [{ key: "src", label: "Source" }, { key: "n", label: "Articles", num: true }],
+    srcs.map(x => ({ src: x.label, n: fmt.int(x.value) })));
+
+  /* ---- facts ----------------------------------------------------------- */
+  const md = g.model || {}, at = g.autotune || {};
+  facts("#facts-gpu", [
+    ["Device", md.device],
+    ["Precision", md.dtype],
+    ["Attention", md.attn],
+    ["Weights", md.weights_gib ? md.weights_gib + " GiB" : null],
+    ["Model load", md.load_seconds ? md.load_seconds + " s" : null],
+    ["KV slot budget", fmt.int(g.kv_budget)],
+    ["KV reserved", at.kv_gib ? at.kv_gib + " GiB" : null],
+    ["Peak VRAM seen", (g.peak_gib || 0).toFixed(2) + " GiB"],
+    ["VRAM target", (g.target_gib ?? "—") + " GiB"],
+    ["GPU seconds", fmt.dur(g.seconds)],
+    ["GPU busy", g.busy_percent == null ? null : fmt.pct(g.busy_percent, 1)],
+    ["OOM splits", fmt.int(g.oom_count)],
+    ["Chunks / second", bc.chunks_per_s ? bc.chunks_per_s.toFixed(1) : null],
+    ["Articles / second", bc.block_art_per_s ? bc.block_art_per_s.toFixed(2) : null],
+  ]);
+  facts("#facts-tok", [
+    ["Source tokens", fmt.int(tk.src)],
+    ["Output tokens", fmt.int(tk.out)],
+    ["Output / source", tk.ratio ? tk.ratio.toFixed(3) : "—"],
+    ["Chunks", fmt.int(tk.chunks)],
+    ["Chunks per article", tk.chunks_per_article ? tk.chunks_per_article.toFixed(2) : "—"],
+    ["Source tokens / article", tk.src_per_article ? tk.src_per_article.toFixed(0) : "—"],
+    ["Live source tok/s", fmt.compact(r.src_tok_per_s)],
+    ["Live output tok/s", fmt.compact(r.out_tok_per_s)],
+    ["Rate window", fmt.dur(r.window_seconds)],
+  ]);
+  facts("#facts-cfg", [
+    ["Process", proc.available === false ? "psutil not installed"
+      : proc.alive ? `pid ${proc.pid} · ${proc.workers} workers` : "not running"],
+    ["Process RAM", proc.alive ? proc.rss_gib.toFixed(2) + " GiB" : null],
+    ["Process CPU", proc.alive ? fmt.pct(proc.cpu_percent, 0) : null],
+    ["Blocks", `${fmt.int(bc.done || 0)} done / ${fmt.int(bc.planned || 0)} started`],
+    ["Config", (c.path || "").split(/[\\/]/).pop()],
+    ["Events", c.events_dir],
+    ["Source", c.data_dir],
+    ["Output", c.output_dir],
+    ["State", c.state_dir],
+    ["Event files", fmt.int(p.event_files)],
+    ["Indexed paths", fmt.int(p.indexed)],
+    ["CPU workers", c.workers],
+    ["Block size", fmt.int(c.block_size)],
+    ["Max batch", fmt.int(c.max_batch_size)],
+    ["Chunk tokens", `${c.chunk_target_tokens} target / ${c.chunk_max_tokens} max`],
+    ["Beams", c.num_beams],
+  ]);
+
+  /* ---- blocks ---------------------------------------------------------- */
+  const plans = d.plans || [];
+  setTable("#tbl-blocks",
+    [{ key: "ts", label: "Finished" }, { key: "arts", label: "Articles", num: true },
+     { key: "secs", label: "Seconds", num: true }, { key: "rate", label: "art/s", num: true },
+     { key: "tps", label: "out tok/s", num: true }, { key: "src", label: "Src tok", num: true },
+     { key: "out", label: "Out tok", num: true }, { key: "langs", label: "Langs", num: true },
+     { key: "batches", label: "Batches", num: true }, { key: "bmax", label: "Max batch", num: true },
+     { key: "prog", label: "Progress", num: true }, { key: "eta", label: "ETA", num: true },
+     { key: "oom", label: "OOM", num: true }],
+    (d.blocks || []).slice().reverse().map((b, i) => {
+      /* plans[k] is the plan for blocks[k]; index from the head, not the tail,
+         because a block in flight leaves one extra plan at the end. */
+      const pl = plans[(d.blocks.length - 1 - i)] || {};
+      return {
+        ts: b.ts, arts: fmt.int(b.articles), secs: b.seconds.toFixed(1),
+        rate: b.art_per_s.toFixed(2), tps: fmt.compact(b.out_tok_per_s),
+        src: fmt.compact(b.src_tokens), out: fmt.compact(b.out_tokens),
+        langs: pl.langs ?? "—", batches: pl.batches ?? "—", bmax: pl.max ?? "—",
+        prog: `${fmt.compact(b.done)}/${fmt.compact(b.total)}`, eta: b.eta, oom: b.oom,
+      };
+    }), "No block has finished yet — the first one lands after the block fills.");
+
+  /* ---- problems -------------------------------------------------------- */
+  setTable("#tbl-ooms",
+    [{ key: "ts", label: "When" }, { key: "batch", label: "Batch split", num: true },
+     { key: "kv", label: "KV budget after", num: true }],
+    (g.ooms || []).slice().reverse().map(o => ({ ts: o.ts, batch: fmt.int(o.batch), kv: fmt.int(o.kv) })),
+    "No out-of-memory events.");
+
+  setTable("#tbl-errors",
+    [{ key: "count", label: "Count", num: true }, { key: "msg", label: "Message", wrap: true }],
+    (d.errors || []).map(e => ({ count: fmt.int(e.count), msg: e.sample || e.key })),
+    "No article errors.");
+
+  /* ---- log ------------------------------------------------------------- */
+  const lg = $("#log");
+  const atBottom = lg.scrollTop + lg.clientHeight >= lg.scrollHeight - 24;
+  fetch("/api/log").then(x => x.text()).then(t => {
+    lg.innerHTML = "";
+    t.split("\n").slice(-160).forEach(line => {
+      const m = line.match(/\| (\w+)\s+\|/);
+      lg.appendChild(el("div", { class: m ? "lvl-" + m[1] : null, text: line }));
+    });
+    if (atBottom) lg.scrollTop = lg.scrollHeight;
+  }).catch(() => {});
+  const lv = d.log_levels || {};
+  $("#log-hint").textContent =
+    `Live from ${c.log_file || "the run log"} — ${fmt.int(lv.INFO || 0)} info, ` +
+    `${fmt.int(lv.WARNING || 0)} warning, ${fmt.int(lv.ERROR || 0)} error lines.`;
+}
+
+/* ========================================================================== *
+ * Polling + controls
+ * ========================================================================== */
+let timer = null;
+async function tick() {
+  try {
+    const res = await fetch("/api/metrics", { cache: "no-store" });
+    render(await res.json());
+  } catch (e) {
+    $("#subtitle").textContent = "dashboard server unreachable — is dashboard.py still running?";
+  }
+}
+function schedule() {
+  if (timer) clearInterval(timer);
+  const ms = +$("#poll").value;
+  if (ms > 0) timer = setInterval(tick, ms);
+}
+$("#poll").addEventListener("change", schedule);
+
+$("#tables-btn").addEventListener("click", e => {
+  const on = document.body.classList.toggle("tables");
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+});
+
+const themeSel = $("#theme");
+themeSel.value = localStorage.getItem("dash-theme") || "auto";
+function applyTheme() {
+  const v = themeSel.value;
+  if (v === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", v);
+  localStorage.setItem("dash-theme", v);
+  if (LAST) requestAnimationFrame(() => render(LAST));   /* re-read CSS vars */
+}
+themeSel.addEventListener("change", applyTheme);
+applyTheme();
+
+tick();
+schedule();
+</script>
+</body>
+</html>

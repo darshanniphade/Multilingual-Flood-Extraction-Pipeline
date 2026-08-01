@@ -1,0 +1,77 @@
+{
+  "_comment": "2022 run. Same tuning as config.json; only paths differ. data_dir points at a staging directory of junctions (2022_MM -> data/ssd/2022/MM) because article ids are '2022_MM/article_...' while the source tree uses bare 'MM' month folders. state_dir is separate so the completed 2021 checkpoint does not mark this run as already done.",
+
+  "paths": {
+    "events_dir": "C:/darsh/pipeline/data/flood_events/2022",
+    "data_dir": "C:/darsh/pipeline/translator/data2022_links",
+    "output_dir": "C:/darsh/pipeline/data/translated_articles/2022",
+    "state_dir": "C:/darsh/pipeline/translator/state_2022",
+    "log_file": "C:/darsh/pipeline/translator/translation_2022.log"
+  },
+
+  "model": {
+    "name": "facebook/nllb-200-distilled-1.3B",
+    "dir": "C:/darsh/AI_MODELS/translate model"
+  },
+
+  "text_field": "text",
+  "title_field": "title",
+  "language_field": "language",
+
+  "dataset": {
+    "articles_subdir": "articles",
+    "skip_english": true,
+    "trust_metadata_language": true,
+    "repair_mojibake": true,
+    "sort_by_language": true,
+    "max_article_chars": 0
+  },
+
+  "chunking": {
+    "target_tokens": 64,
+    "max_tokens": 192
+  },
+
+  "gpu": {
+    "autotune": true,
+    "kv_slot_budget": 80000,
+    "min_kv_slot_budget": 4096,
+    "max_kv_slot_budget": 120000,
+    "max_batch_size": 384,
+    "target_peak_vram_gib": 11.0,
+    "activation_reserve_gib": 0.75,
+    "memory_fraction": 0.88,
+    "attn_implementation": "sdpa",
+    "tf32": true,
+    "max_retries": 4
+  },
+
+  "generation": {
+    "num_beams": 1,
+    "max_new_token_ratio": 1.8,
+    "max_new_token_pad": 24,
+    "hard_max_new_tokens": 384,
+    "budget_len_ratio": 1.25,
+    "budget_len_pad": 16
+  },
+
+  "cpu": {
+    "workers": 24,
+    "block_size": 24000,
+    "prefetch_blocks": 3,
+    "index_workers": 32
+  },
+
+  "checkpoint": {
+    "every_n_articles": 500
+  },
+
+  "output": {
+    "translated_text_field": "translated_text",
+    "translated_title_field": "translated_title",
+    "metadata_field": "translation_meta",
+    "add_metadata": true,
+    "chunk_join": " ",
+    "json_indent": 2
+  }
+}

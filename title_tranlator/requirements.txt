@@ -1,0 +1,17 @@
+# Install into the project env, e.g.:
+#   C:\darsh\AI_MODELS\translator_env\Scripts\python.exe -m pip install -r requirements.txt
+#
+# NOTE: the provided env (C:\darsh\AI_MODELS\translator_env) already has all of
+# these, including a CUDA build of torch (torch==2.11.0+cu128). Only reinstall
+# torch from the official CUDA index if you need to rebuild the environment:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+torch>=2.1
+transformers>=4.40
+tokenizers>=0.15
+sentencepiece>=0.1.99
+accelerate>=0.20
+tqdm>=4.60
+# Source-language detection for datasets whose records carry no 'language'
+# field (the 2022 ssd export is one). Not needed if language.detect_when_missing
+# is false in config.json.
+langdetect>=1.0.9

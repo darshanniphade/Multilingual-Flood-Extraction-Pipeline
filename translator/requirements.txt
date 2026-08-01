@@ -1,0 +1,30 @@
+# Flood-article translation pipeline -- requirements
+#
+# The target environment (C:\darsh\AI_MODELS\translator_env) ALREADY SATISFIES
+# all of these; this file documents and pins the versions the pipeline was
+# built and calibrated against. Do not `pip install -r` into that env without
+# reason -- in particular, installing plain `torch` would replace the CUDA build
+# with the CPU-only wheel and the pipeline would refuse to start.
+#
+# Verified working set (2026-07-17, Python 3.14.6):
+
+# --- Core inference -------------------------------------------------------- #
+# CUDA build. Install from the PyTorch index, never from plain PyPI:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+transformers==5.13.0
+accelerate==1.14.0
+safetensors==0.8.0
+sentencepiece==0.2.1
+protobuf==7.35.1
+
+# --- Language detection (fallback when article metadata has no language) ---- #
+langdetect==1.0.9
+
+# --- Metrics / progress ----------------------------------------------------- #
+tqdm==4.68.4
+psutil==7.2.2
+nvidia-ml-py==13.610.43
+
+# --- Numerics --------------------------------------------------------------- #
+numpy==2.4.4
