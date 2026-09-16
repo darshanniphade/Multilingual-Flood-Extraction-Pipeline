@@ -1,0 +1,53 @@
+{
+  "_comment": "Flood-event extraction over translated English articles via Ollama. Defaults calibrated for an RTX 4060 Ti (16 GB) running qwen3:14b. model.name, generation.num_ctx and run.workers interact through VRAM -- see the _comment in each section before changing them together.",
+
+  "paths": {
+    "input_root": "C:/darsh/pipeline/data/only_english",
+    "output_root": "C:/darsh/pipeline/data/extracted",
+    "system_prompt_file": "C:/darsh/pipeline/6_extract_events/system_prompt.txt"
+  },
+
+  "model": {
+    "_comment": "think=false matters: qwen3 reasons before answering by default, which both slows generation and leaks non-JSON into the response. keep_alive holds the model in VRAM between batches so a long run never pays the ~30s reload; set it to '0' to unload immediately after.",
+    "name": "qwen3:14b",
+    "keep_alive": "30m",
+    "think": false
+  },
+
+  "generation": {
+    "_comment": "Sampled article lengths: p50 471 tokens, p90 1089, p99 2283. num_ctx 4096 fits ~99% of articles whole alongside the system prompt and the answer. Raising it multiplies through run.workers -- the server allocates num_ctx x OLLAMA_NUM_PARALLEL of KV cache (~160 KB/token for this model), and overflowing VRAM silently moves layers to CPU at roughly 3x the cost. temperature 0 for reproducible extraction.",
+    "_num_predict_comment": "Safety rail only, NOT a speed knob - see extract.extract_one. Measured over 23,685 calls: median answer 42 tokens (the EARLY EXIT object), p99 318, longest legitimate 982. 1024 truncates nothing real while bounding a request that loops instead of terminating. Lowering it backfires: a cut-off answer is unparseable JSON and temperature 0 reproduces it verbatim on retry, so one long-but-valid generation becomes three truncated failures. Generation is ~91% of GPU time here, but the tail is real event arrays being written out, not waste -- the lever is emitting fewer tokens per article, not cutting answers off mid-object.",
+    "num_ctx": 4096,
+    "num_predict": 1024,
+    "temperature": 0,
+    "top_p": 1,
+    "format": "json"
+  },
+
+  "input": {
+    "_comment": "Articles live at input_root/<YYYY_MM>/<articles_subdir>/article_*.json. Text beyond max_article_chars is truncated; 12000 chars (~3k tokens) keeps the request inside num_ctx 4096. Measured: only ~2 in 800 articles exceed it.",
+    "articles_subdir": "articles",
+    "id_field": "article_id",
+    "title_field": "translated_title",
+    "text_field": "translated_text",
+    "max_article_chars": 12000,
+
+    "_publish_date_comment": "News articles usually write 'Saturday, January 9' with no year, but PHASE 3 demands YYYY-MM-DD -- so the model either drops the date or guesses the year. publish_date_root points at a parallel tree (same <YYYY_MM>/articles/<article_id>.json layout) carrying a publish_date field, which is injected as a PUBLISHED: line so the year is stated rather than inferred. Measured 100% populated across a 400-article sample. Set to null to disable; the prompt must also authorise using it, or the model may ignore the line.",
+    "publish_date_root": "C:/darsh/pipeline/data/translated_articles",
+    "publish_date_field": "publish_date"
+  },
+
+  "run": {
+    "_comment": "workers is the client-side concurrency and must be <= the server's OLLAMA_NUM_PARALLEL env var (currently 12), otherwise requests just queue. Measured at num_ctx 4096 with an f16 KV cache: 1 worker 0.157 art/s, 2 workers 0.270 (1.73x), 4 workers 0.455 (2.91x). 12 slots only fit because OLLAMA_KV_CACHE_TYPE=q8_0 halves the per-slot cache -- loaded size 13 GB of 16, verified '100% GPU'. Throughput at 12 workers is NOT measured. If `ollama ps` ever shows a CPU/GPU split, drop workers back to 4: a spill costs ~3x, more than any parallelism gains.",
+    "workers": 12,
+    "retries": 2,
+    "retry_backoff_seconds": 2,
+    "progress_seconds": 1
+  },
+
+  "output": {
+    "_comment": "One JSONL line per article in output_root/<YYYY_MM>.jsonl, failures in <YYYY_MM>.failed.jsonl. Runs resume by skipping article_ids already present, so a killed run costs nothing.",
+    "extraction_field": "extraction",
+    "include_title": true
+  }
+}

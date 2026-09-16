@@ -1,0 +1,66 @@
+{
+  "_comment": "ReliefWeb report archive: 1,029,581 English documents in 68 year folders (1959-2026). Unlike the news corpora this text was never translated, every report file is self-contained, and the partition is a YEAR rather than a YYYY_MM month. Model/VRAM calibration is inherited verbatim from config.json - see the _comment in each section there before changing model.name, generation.num_ctx and run.workers together.",
+
+  "paths": {
+    "input_root": "D:/reliefweb_archive/reports/clean_text",
+    "output_root": "D:/reliefweb_archive/reports/extracted_data",
+    "system_prompt_file": "C:/darsh/pipeline/6_extract_events/system_prompt.txt"
+  },
+
+  "model": {
+    "name": "qwen3:14b",
+    "keep_alive": "30m",
+    "think": false
+  },
+
+  "generation": {
+    "_comment": "Sampled clean_text length across 8 years x 40 files: mean 2.7k chars (~700 tokens), so num_ctx 4096 fits essentially every report whole alongside the system prompt and the answer.",
+    "_num_predict_comment": "Safety rail only - see extract.extract_one and the calibration note in config.json. 1024 sits above the longest legitimate answer measured on the news corpus (982 tokens); lowering it to chase speed trades a little generation time for articles lost to unparseable truncated JSON, which temperature 0 retries cannot recover.",
+    "num_ctx": 4096,
+    "num_predict": 1024,
+    "temperature": 0,
+    "top_p": 1,
+    "format": "json"
+  },
+
+  "input": {
+    "_comment": "Reports sit directly in <input_root>/<YYYY>/ named by report id (1000011.json), not under an articles/ subdir and not article_*.json - hence articles_subdir '.' and the file_glob. Field names are the archive's own: report_id / title / clean_text.",
+    "articles_subdir": ".",
+    "file_glob": "*.json",
+    "id_field": "report_id",
+    "title_field": "title",
+    "text_field": "clean_text",
+    "max_article_chars": 12000,
+
+    "_publish_date_comment": "Each report carries its own ISO publication timestamp, so no parallel tree is needed - publish_date_inline reads it straight from the file being processed and extract.normalize_date trims '2015-05-20T00:00:00+00:00' to '2015-05-20'. Verified 100% populated across a 320-report sample spanning 1996-2026.",
+    "publish_date_inline": true,
+    "publish_date_root": null,
+    "publish_date_field": "published",
+
+    "_passthrough_comment": "Archive metadata copied verbatim into each output record. The model never sees these; they are here so downstream analysis can group by reporting country/agency and jump back to the source without reopening a million files. country is the archive's own tagging, independent of the model-extracted flooded_locations - useful precisely because the two can be compared.",
+    "passthrough_fields": ["country", "source", "url"],
+
+    "_prefilter_comment": "Skips the model on documents that cannot qualify. The prompt only sets contains_flood_event when a location is explicitly flooded/submerged/inundated, so a document with no flood vocabulary at all is a guaranteed false - and this archive is mostly ReliefWeb reports on conflict, health and displacement. MEASURED on a 9,300-report random sample across 1996-2026: 78.4% skipped, i.e. a 4.6x speedup, taking the full run from ~10.4 days to ~2.5. Recall was checked against 117 model-confirmed flood reports and the pattern misses NONE. Multilingual on purpose: the archive is 85% English but 8% French and 5% Spanish, and an English-only gate silently dropped every 'Inondations' report in the 1980s UNDRO series - hence inond/inunda/crue/desborda and the Arabic and Russian terms. The rainfall and storm terms (torrential, monsoon, cyclone...) are insurance the prompt does not strictly require; they cost ~5 points of skip rate and were what caught the two 'Torrential Rains'/'Heavy Rain' reports the flood-only pattern missed. Skipped documents are still written, marked prefiltered:true, so the output covers every source file and can be re-run if this widens. Set enabled false to send everything to the model.",
+    "prefilter": {
+      "enabled": true,
+      "pattern": "flood|inunda|inond|submerg|sumerg|under ?water|deluge|d.luge|waterlog|burst +(its|their) +bank|broke +(its|their) +bank|overflow|desborda|\\bcrues?\\b|d.bord|crecida|riada|cheias|enchente|alagam|swollen|storm +surge|high +water|washed +away|ruissellement|hochwasser|berschwemmung|alluvion|esondaz|فيضان|سيول|наводнен|паводок|потоп|torrential|torrentiel|torrencial|heavy +rain|downpour|monsoon|mousson|cyclone|typhoon|tifon|hurricane|hurac|aguacero|intemp.ries|lluvias|pluies|ليول|ливн"
+    }
+  },
+
+  "run": {
+    "_comment": "request_timeout_seconds caps a single model call; ollama's client defaults to no timeout, so one wedged request would pin a worker for the rest of a multi-day run. A typical report takes ~10-15s at 12 workers, so 180s is ~12x headroom. workers must stay <= the server's OLLAMA_NUM_PARALLEL (currently 12).",
+    "workers": 12,
+    "retries": 2,
+    "retry_backoff_seconds": 2,
+    "request_timeout_seconds": 180,
+    "progress_seconds": 1
+  },
+
+  "output": {
+    "_comment": "One JSONL line per report in output_root/<YYYY>.jsonl, failures in <YYYY>.failed.jsonl. Runs resume by skipping report ids already present, so a killed run costs nothing. title_key is 'title' rather than the news pipeline's 'translated_title' because nothing here was translated.",
+    "extraction_field": "extraction",
+    "include_title": true,
+    "title_key": "title",
+    "partition_column": "year"
+  }
+}

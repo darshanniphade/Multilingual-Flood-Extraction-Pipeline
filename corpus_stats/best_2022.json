@@ -1,0 +1,840 @@
+{
+ "top": [
+  {
+   "n": 25,
+   "id": "article_000013633",
+   "month": "2022_10",
+   "title": "Flooding in Thanh Hoa, Nghệ An, Hà Tĩnh killed eight people",
+   "dates": [
+    "2022-10-02"
+   ],
+   "locs": [
+    "Thanh Hoa",
+    "Nghệ An",
+    "Hà Tĩnh",
+    "Ky Son district",
+    "Tac Chau",
+    "Mường Xen town",
+    "Ta Chau commune",
+    "Sơn Hà",
+    "Cang",
+    "Sơn Hà",
+    "Ta Cạ Public Security Society",
+    "Mường Xén to Tây Sơn line",
+    "Hòa Sơn",
+    "Ta Cạ commune"
+   ],
+   "ev": {
+    "country": "Vietnam",
+    "province": "Hà Tĩnh",
+    "district": "Ky Son",
+    "city": "Cang",
+    "location": "Ta Cạ commune",
+    "event_date": "2022-10-02",
+    "affected_people": 14033,
+    "affected_people_type": "houses",
+    "evacuated": 2000,
+    "evacuated_type": "homes",
+    "deaths": 8,
+    "deaths_type": "people",
+    "houses_damaged": 143,
+    "houses_destroyed": 19,
+    "roads_damaged": 9150,
+    "bridges_damaged": 82,
+    "schools_damaged": 127,
+    "crop_damage": 11435,
+    "crop_damage_unit": "hectares",
+    "livestock_loss": 155340,
+    "livestock_loss_type": "livestock, poultry",
+    "economic_loss": 710,
+    "economic_loss_currency": "tons of salt",
+    "response_agencies": "Standing Office of the National Directorate for Disaster Prevention",
+    "summary": "Flooding in the provinces of Thanh Hoa, Nghệ An, Hà Tĩnh has killed 8 people. Floodwaters caused 26 houses to be damaged by over 70%; 143 houses damaged, roofs splayed; 55 houses affected by landslides; more than 2,000 homes evacuated; 14,033 houses flooded. Floodwaters also produced 11,435 hectares of rice, colorful flowers; more than 3,800 hectares of industrial, annual, perennial fruit trees; nearly 135 hectares of forest; over 9,000 hectares of ponds; more than 710 tons of salt damaged; 155,340 livestock, poultry killed, drifted; 127 school sites affected; 9,150 m of ditch; 26 small dam dam damaged; 82 bridges, damaged; 1,550 m of river bank washed away; over 75,800 m3 of rock flooded; 112 sewers damaged; 29 sites flooded; 100 sites washed away; 51 power poles, over 5,500 m of fence collapsed. In particular in Ky Son district, Nghệ An province, this is the area that was heavily damaged by the flooding, as of 17:30 on 2 October, 14 houses were washed away (Tac Chau, Mường Xen town); 85 houses in Ta Chau commune and Mường Xen town; flooded State agencies in Block 1, Mường Xen town. Currently, the water has receded, leaving mud, filling the soil; 19 houses were washed away, including 3 strong houses completely washed away (in the city of Cang, Sơn Hà); completely collapsed the workhouse of the Ta Cạ Public Security Society. Several sections of the Mường Xén to Tây Sơn line (including 4 very heavy landslides), damaged the iron arch bridge of Hòa Sơn, Ta Cạ commune. Traffic to the towns of Ta Chau and Ti Sơn was completely jammed; the road was diverted to the 7th national highway at Ta Chau, where vehicles are currently unable to pass; the road was diverted to 10 points on the 7th national highway in the area of Nậm Cắn. In addition, the floodwater isolated two communes, including Hòa Sơn, which had a population of 236 and 966 people, and Sơn Hà, which was completely isolated; two cars were washed away (one was rescued); 10 cars were flooded."
+   }
+  },
+  {
+   "n": 22,
+   "id": "article_000089863",
+   "month": "2022_04",
+   "title": "READ IN FULL | President Ramaphosa announces declaration of national state of disaster after floods",
+   "dates": [
+    "2022-04-11",
+    "2022-04-12"
+   ],
+   "locs": [
+    "KwaZulu-Natal",
+    "Eastern Cape",
+    "Ethekwini metro",
+    "iLembe",
+    "Ugu",
+    "King Cetshwayo",
+    "uMgungundlovu",
+    "Alfred Nzo",
+    "Joe Gqabi",
+    "OR Tambo",
+    "Port St Johns"
+   ],
+   "ev": {
+    "country": "South Africa",
+    "province": "KwaZulu-Natal",
+    "district": "Ethekwini",
+    "event_date": "2022-04-11",
+    "start_date": "2022-04-11",
+    "end_date": "2022-04-12",
+    "affected_people": 40000,
+    "affected_people_type": "people",
+    "evacuated": 40000,
+    "evacuated_type": "people",
+    "deaths": 443,
+    "deaths_type": "people",
+    "missing": 48,
+    "missing_type": "people",
+    "houses_damaged": 8300,
+    "houses_destroyed": 4000,
+    "roads_damaged": 1300,
+    "bridges_damaged": 1300,
+    "schools_damaged": 600,
+    "hospitals_damaged": 66,
+    "economic_loss": 270000,
+    "economic_loss_currency": "learners"
+   }
+  },
+  {
+   "n": 21,
+   "id": "article_000009739",
+   "month": "2022_03",
+   "title": "Two People Killed in Floods and Landslides in Manado City",
+   "dates": [
+    "2022-03-03"
+   ],
+   "locs": [
+    "Kelurahan Denlu",
+    "Kelurahan Malendeng",
+    "Kelurahan Paal Dua",
+    "Kelurahan Ranomuut",
+    "Ranotana Weru",
+    "Karombasan North",
+    "Wanea",
+    "Singkil Two",
+    "Kombos East",
+    "Tenate Tanjung",
+    "Sumompo Kelurahan",
+    "Taas Kelurahan",
+    "New Tikala Kelurahan"
+   ],
+   "ev": {
+    "country": "Indonesia",
+    "province": "North Sulawesi",
+    "city": "Manado City",
+    "location": "Kelurahan Denlu, Kelurahan Malendeng, Kelurahan Paal Dua, Kelurahan Ranomuut, Ranotana Weru, Karombasan North, Wanea, Singkil Two, Kombos East, Tenate Tanjung, Sumompo Kelurahan, Taas Kelurahan, New Tikala Kelurahan",
+    "river": "Tondano River, Sario River, Malendeng River, Bailang River",
+    "event_date": "2022-03-03",
+    "affected_people": 278,
+    "affected_people_type": "people",
+    "evacuated": 104,
+    "evacuated_type": "people",
+    "deaths": 2,
+    "deaths_type": "people",
+    "injured_type": "people",
+    "missing_type": "people",
+    "houses_damaged": 155,
+    "roads_damaged": 2,
+    "crop_damage_unit": "hectares",
+    "livestock_loss_type": "animals",
+    "economic_loss_currency": "IDR",
+    "water_level": 75,
+    "water_unit": "cm"
+   }
+  },
+  {
+   "n": 21,
+   "id": "article_000103223",
+   "month": "2022_07",
+   "title": "At least 16 people are dead after Kentucky's catastrophic flooding, and the death toll is expected to rise",
+   "dates": [
+    "2022-07-28"
+   ],
+   "locs": [
+    "Knott County",
+    "Perry County",
+    "Letcher County",
+    "Clay County",
+    "Hazard, Kentucky",
+    "Oneida Community near Manchester, Kentucky",
+    "Floyd County",
+    "Whitesburg"
+   ],
+   "ev": {
+    "country": "United States",
+    "state": "Kentucky",
+    "county": "Knott County",
+    "location": "Knott County",
+    "event_date": "2022-07-28",
+    "affected_people": 16,
+    "affected_people_type": "people",
+    "deaths": 16,
+    "deaths_type": "people",
+    "missing": 6,
+    "missing_type": "people",
+    "evacuated": 80,
+    "evacuated_type": "people",
+    "displaced": 23000,
+    "displaced_type": "people",
+    "houses_damaged": "hundreds",
+    "roads_damaged": "numerous",
+    "bridges_damaged": 7,
+    "economic_loss": "significant",
+    "economic_loss_currency": "USD",
+    "response_agencies": "Kentucky State Police, National Guard, Federal Emergency Management Agency (FEMA), West Virginia National Guard, Tennessee National Guard",
+    "summary": "Catastrophic flooding in Kentucky resulted in at least 16 deaths, including children, and left many people missing. The flooding was exacerbated by heavy rainfall and caused widespread damage to homes, roads, and bridges. Rescue efforts were ongoing, with hundreds of boat and air rescues conducted. The governor warned that the death toll is expected to rise."
+   }
+  },
+  {
+   "n": 20,
+   "id": "article_000126975",
+   "month": "2022_04",
+   "title": "Floods: South Africa declared a national disaster",
+   "dates": [
+    "2022-04-09",
+    "2022-04-10"
+   ],
+   "locs": [
+    "Durban",
+    "KwaZulu-Natal province"
+   ],
+   "ev": {
+    "country": "South Africa",
+    "province": "KwaZulu-Natal",
+    "city": "Durban",
+    "event_date": "2022-04-09",
+    "start_date": "2022-04-09",
+    "end_date": "2022-04-10",
+    "affected_people": 40000,
+    "affected_people_type": "people",
+    "evacuated": 10000,
+    "evacuated_type": "soldiers",
+    "deaths": 443,
+    "deaths_type": "people",
+    "missing": 48,
+    "missing_type": "people",
+    "houses_destroyed": 4000,
+    "roads_damaged": "thousands of homes, completely cut off roads and bridges",
+    "schools_damaged": 600,
+    "economic_loss": "hundreds of millions of dollars",
+    "response_agencies": "South African government",
+    "summary": "The rains are finally starting to subside, and South Africa is still trying to assess the damage caused by the recent floods in the Durban region in the southeast. On Monday, April 18, President Cyril Ramaphosa announced a new death toll in a televised address: 443 people have now died and 48 are still missing. Rescue workers remain mobilised to help the most vulnerable in KwaZulu-Natal province, where 4,000 homes have been destroyed. President Ramaphosa estimates that 40,000 people have been affected by the disaster, almost without water, electricity and food for over a week. About 10,000 soldiers were deployed to search for survivors and to ensure supplies of essential goods. Since the weekend of 9 and 10 April, the port city of Durban on the east coast of South Africa has been experiencing cyclone-like conditions. The amount of rainfall, unprecedented in more than sixty years, has been devastating. Landslides washed away or damaged thousands of homes, completely cut off roads and bridges, and forced the closure of more than 600 schools."
+   }
+  }
+ ],
+ "mq": {
+  "pakistan": [
+   {
+    "n": 15,
+    "id": "article_000096332",
+    "month": "2022_07",
+    "title": "16 dead in Kentucky flooding, toll expected to rise - Pakistan Observer",
+    "dates": [
+     "2022-07-07"
+    ],
+    "locs": [
+     "Appalachia region of eastern Kentucky",
+     "Perry County",
+     "Knott County",
+     "North Fork of the Kentucky River at Whitesburg"
+    ],
+    "ev": {
+     "country": "United States",
+     "state": "Kentucky",
+     "location": "Appalachia region of eastern Kentucky",
+     "event_date": "2022-07-07",
+     "affected_people": 16,
+     "affected_people_type": "people",
+     "deaths": 16,
+     "deaths_type": "people",
+     "evacuated": 50,
+     "evacuated_type": "people",
+     "flood_duration": 3,
+     "duration_unit": "days",
+     "rainfall_mm": 203.2,
+     "water_level": 20,
+     "water_unit": "ft"
+    }
+   },
+   {
+    "n": 14,
+    "id": "article_000116230",
+    "month": "2022_04",
+    "title": "AU stands in solidarity with Africa's most industrialised nation hit by severe floods",
+    "dates": [
+     "2022-04-19"
+    ],
+    "locs": [
+     "Durban",
+     "KwaZulu-Natal (KZN)"
+    ],
+    "ev": {
+     "country": "South Africa",
+     "event_date": "2022-04-19",
+     "affected_people": 443,
+     "affected_people_type": "people",
+     "deaths": 443,
+     "deaths_type": "people",
+     "missing": 63,
+     "missing_type": "people",
+     "houses_destroyed": 4000,
+     "schools_damaged": 250,
+     "economic_loss": 200000000,
+     "economic_loss_currency": "USD",
+     "response_agencies": "South African government, military, volunteers",
+     "summary": "Severe floods occurred in South Africa on 19 April 2022, killing 443 people, destroying nearly 4,000 homes, damaging over 13,500 properties, affecting 250 schools, and causing infrastructure damage estimated at $200 million. The metropolis of Durban in KwaZulu-Natal was the most affected region."
+    }
+   }
+  ],
+  "durban_kzn": [
+   {
+    "n": 22,
+    "id": "article_000089863",
+    "month": "2022_04",
+    "title": "READ IN FULL | President Ramaphosa announces declaration of national state of disaster after floods",
+    "dates": [
+     "2022-04-11",
+     "2022-04-12"
+    ],
+    "locs": [
+     "KwaZulu-Natal",
+     "Eastern Cape",
+     "Ethekwini metro",
+     "iLembe",
+     "Ugu",
+     "King Cetshwayo",
+     "uMgungundlovu",
+     "Alfred Nzo",
+     "Joe Gqabi",
+     "OR Tambo",
+     "Port St Johns"
+    ],
+    "ev": {
+     "country": "South Africa",
+     "province": "KwaZulu-Natal",
+     "district": "Ethekwini",
+     "event_date": "2022-04-11",
+     "start_date": "2022-04-11",
+     "end_date": "2022-04-12",
+     "affected_people": 40000,
+     "affected_people_type": "people",
+     "evacuated": 40000,
+     "evacuated_type": "people",
+     "deaths": 443,
+     "deaths_type": "people",
+     "missing": 48,
+     "missing_type": "people",
+     "houses_damaged": 8300,
+     "houses_destroyed": 4000,
+     "roads_damaged": 1300,
+     "bridges_damaged": 1300,
+     "schools_damaged": 600,
+     "hospitals_damaged": 66,
+     "economic_loss": 270000,
+     "economic_loss_currency": "learners"
+    }
+   },
+   {
+    "n": 20,
+    "id": "article_000126975",
+    "month": "2022_04",
+    "title": "Floods: South Africa declared a national disaster",
+    "dates": [
+     "2022-04-09",
+     "2022-04-10"
+    ],
+    "locs": [
+     "Durban",
+     "KwaZulu-Natal province"
+    ],
+    "ev": {
+     "country": "South Africa",
+     "province": "KwaZulu-Natal",
+     "city": "Durban",
+     "event_date": "2022-04-09",
+     "start_date": "2022-04-09",
+     "end_date": "2022-04-10",
+     "affected_people": 40000,
+     "affected_people_type": "people",
+     "evacuated": 10000,
+     "evacuated_type": "soldiers",
+     "deaths": 443,
+     "deaths_type": "people",
+     "missing": 48,
+     "missing_type": "people",
+     "houses_destroyed": 4000,
+     "roads_damaged": "thousands of homes, completely cut off roads and bridges",
+     "schools_damaged": 600,
+     "economic_loss": "hundreds of millions of dollars",
+     "response_agencies": "South African government",
+     "summary": "The rains are finally starting to subside, and South Africa is still trying to assess the damage caused by the recent floods in the Durban region in the southeast. On Monday, April 18, President Cyril Ramaphosa announced a new death toll in a televised address: 443 people have now died and 48 are still missing. Rescue workers remain mobilised to help the most vulnerable in KwaZulu-Natal province, where 4,000 homes have been destroyed. President Ramaphosa estimates that 40,000 people have been affected by the disaster, almost without water, electricity and food for over a week. About 10,000 soldiers were deployed to search for survivors and to ensure supplies of essential goods. Since the weekend of 9 and 10 April, the port city of Durban on the east coast of South Africa has been experiencing cyclone-like conditions. The amount of rainfall, unprecedented in more than sixty years, has been devastating. Landslides washed away or damaged thousands of homes, completely cut off roads and bridges, and forced the closure of more than 600 schools."
+    }
+   }
+  ],
+  "petropolis": [
+   {
+    "n": 18,
+    "id": "article_000037949",
+    "month": "2022_04",
+    "title": "Heavy rain causes floods and landslides in Rio de Janeiro, Brazil - 31 inches of rainfall in 48 hours - 16 killed (UPDATES)",
+    "dates": [
+     "2022-04-02"
+    ],
+    "locs": [
+     "Paraty",
+     "Angra dos Reis",
+     "Mesquita"
+    ],
+    "ev": {
+     "country": "Brazil",
+     "state": "Rio de Janeiro",
+     "city": "Paraty",
+     "event_date": "2022-04-02",
+     "affected_people": 219,
+     "affected_people_type": "families",
+     "evacuated": 71,
+     "evacuated_type": "families",
+     "deaths": 7,
+     "deaths_type": "people",
+     "missing": 3,
+     "missing_type": "people",
+     "houses_damaged": 7,
+     "houses_destroyed": 7,
+     "flood_duration": 2,
+     "duration_unit": "days",
+     "rainfall_mm": 809,
+     "summary": "Torrential rains triggered flash floods and landslides, killing at least eight people including six children and leaving 13 missing. A landslide in the Ponta Negra neighbourhood destroyed 7 houses, burying at least 8 residents from the same family."
+    }
+   },
+   {
+    "n": 16,
+    "id": "article_000023017",
+    "month": "2022_02",
+    "title": "Torrential rains in Petrópolis leave more than 100 dead [17/02/2022]",
+    "dates": [
+     "2022-02-15"
+    ],
+    "locs": [
+     "Petrópolis"
+    ],
+    "ev": {
+     "country": "Brazil",
+     "state": "Rio de Janeiro",
+     "city": "Petrópolis",
+     "event_date": "2022-02-15",
+     "affected_people": 104,
+     "affected_people_type": "people",
+     "missing": 35,
+     "missing_type": "people",
+     "deaths": 104,
+     "deaths_type": "people",
+     "evacuated": 24,
+     "evacuated_type": "people",
+     "houses_damaged": "reduced to rubble",
+     "roads_damaged": "overflowing rivers",
+     "response_agencies": "firefighters, Civil Defense, federal government",
+     "summary": "Torrential rains caused nearly 300 landslides, leading to over 100 deaths and significant destruction in Petrópolis, Brazil."
+    }
+   }
+  ],
+  "seoul": [
+   {
+    "n": 18,
+    "id": "article_000097001",
+    "month": "2022_08",
+    "title": "At least 16 people are dead or missing in South Korea's torrential rains",
+    "dates": [
+     "2022-08-08",
+     "2022-08-10"
+    ],
+    "locs": [
+     "Seoul",
+     "Gwangju",
+     "Yanpyeong",
+     "Gyeonggi Province",
+     "Gangwon Province",
+     "Seoul metropolitan area",
+     "Incheon"
+    ],
+    "ev": {
+     "country": "South Korea",
+     "city": "Seoul",
+     "event_date": "2022-08-10",
+     "affected_people": 16,
+     "affected_people_type": "people",
+     "evacuated": 1823,
+     "evacuated_type": "people",
+     "deaths": 9,
+     "deaths_type": "people",
+     "injured": 17,
+     "injured_type": "people",
+     "missing": 7,
+     "missing_type": "people",
+     "houses_damaged": 2676,
+     "flood_duration": 2,
+     "duration_unit": "days",
+     "rainfall_mm": 525,
+     "water_unit": "mm"
+    }
+   },
+   {
+    "n": 17,
+    "id": "article_000175464",
+    "month": "2022_08",
+    "title": "Photo: Seoul \"surrounded by water\" in worst rainfall in 80 years, crowds evacuated",
+    "dates": [
+     "1942-08-05",
+     "2022-08-08"
+    ],
+    "locs": [
+     "Seoul",
+     "Incheon",
+     "Gyeonggi Province",
+     "Dongjak county",
+     "Gwanak district",
+     "Seocho district",
+     "Gwangju City",
+     "Gyeonggi Province"
+    ],
+    "ev": {
+     "country": "South Korea",
+     "city": "Seoul",
+     "event_date": "2022-08-08",
+     "affected_people": 163,
+     "affected_people_type": "people",
+     "evacuated": 163,
+     "evacuated_type": "people",
+     "deaths": 5,
+     "deaths_type": "people",
+     "missing": 8,
+     "missing_type": "people",
+     "injured": 9,
+     "injured_type": "people",
+     "houses_damaged": 107,
+     "houses_damaged_type": "households",
+     "roads_damaged": 80,
+     "response_agencies": "Firefighters",
+     "summary": "Seoul 'surrounded by water' in the worst rains in 80 years, as crowds of people left their homes in South Korea's capital Seoul as record rain and flooding hit last night. On the evening and night of August 8, parts of Seoul, the western port city of Incheon, and Gyeonggi Province around the Korean capital received the largest rainfall in recorded history in 80 years, since August 5, 1942. According to the Korea Times, rainfall reached more than 100mm/h last night, with some cases in Dongjak county reaching 141.5mm. The torrential downpour left five people dead and four others missing in Seoul, while in Gyeonggi Province, two people were dead and two others missing as of 6 a.m., according to the South Korean government. Nine people were injured in Gyeonggi Province and 163 people from 107 households in the capital left their homes and had to be temporarily housed in schools and other public facilities."
+    }
+   }
+  ],
+  "sylhet": [
+   {
+    "n": 17,
+    "id": "article_000027996",
+    "month": "2022_06",
+    "title": "Four million people affected by 'double floods' within a month in Bangladesh's Sylhet division",
+    "dates": [
+     "2022-05-10",
+     "2022-06-16"
+    ],
+    "locs": [
+     "Sylhet city",
+     "Sylhet district",
+     "Sunamganj district",
+     "Moulvibazar district",
+     "Companiganj upazila",
+     "Gowainghat upazila",
+     "Sultanpur village",
+     "Vadertek village",
+     "Bishwambharpur upazila"
+    ],
+    "ev": {
+     "country": "Bangladesh",
+     "location": "Sylhet division",
+     "event_date": "2022-05-10",
+     "flood_duration": 12,
+     "duration_unit": "days",
+     "affected_people": 4000000,
+     "affected_people_type": "people",
+     "evacuated": 12,
+     "evacuated_type": "families",
+     "houses_damaged": 12,
+     "houses_destroyed": 12,
+     "crop_damage": 1100,
+     "crop_damage_unit": "crore Bangladeshi Taka",
+     "economic_loss": 9215800000,
+     "economic_loss_currency": "Bangladeshi Taka",
+     "response_agencies": "Bangladesh Army",
+     "summary": "Two rounds of flooding within a month in northeastern Bangladesh's Sylhet division have left four million people fighting for survival, with their houses, paddy fields, fish ponds and livestock washed away."
+    }
+   },
+   {
+    "n": 15,
+    "id": "article_000027996",
+    "month": "2022_06",
+    "title": "Four million people affected by 'double floods' within a month in Bangladesh's Sylhet division",
+    "dates": [
+     "2022-05-10",
+     "2022-06-16"
+    ],
+    "locs": [
+     "Sylhet city",
+     "Sylhet district",
+     "Sunamganj district",
+     "Moulvibazar district",
+     "Companiganj upazila",
+     "Gowainghat upazila",
+     "Sultanpur village",
+     "Vadertek village",
+     "Bishwambharpur upazila"
+    ],
+    "ev": {
+     "country": "Bangladesh",
+     "location": "Sylhet division",
+     "event_date": "2022-06-16",
+     "flooded_locations": [
+      "Sylhet city",
+      "Sylhet district",
+      "Sunamganj district",
+      "Moulvibazar district",
+      "Companiganj upazila",
+      "Gowainghat upazila",
+      "Sultanpur village",
+      "Vadertek village",
+      "Bishwambharpur upazila"
+     ],
+     "affected_people": 100000,
+     "affected_people_type": "people",
+     "evacuated": 12,
+     "evacuated_type": "families",
+     "houses_damaged": 12,
+     "houses_destroyed": 12,
+     "crop_damage": 1100,
+     "crop_damage_unit": "crore Bangladeshi Taka",
+     "economic_loss": 9215800000,
+     "economic_loss_currency": "Bangladeshi Taka",
+     "response_agencies": "Bangladesh Army",
+     "summary": "A second round of flooding occurred June 16 and has made the situation dire."
+    }
+   }
+  ],
+  "yellowstone": [
+   {
+    "n": 15,
+    "id": "article_000033065",
+    "month": "2022_06",
+    "title": "Jun 2022: Yellowstone flooding forces 10,000 to leave national park",
+    "dates": [
+     "2022-06-13"
+    ],
+    "locs": [
+     "Yellowstone National Park",
+     "Red Lodge, Montana",
+     "Fromberg, Carbon County",
+     "Gardiner, Montana",
+     "Cooke City",
+     "Silvergate",
+     "Livingston",
+     "Nye",
+     "Corwin Springs"
+    ],
+    "ev": {
+     "country": "United States",
+     "state": "Montana",
+     "city": "Red Lodge",
+     "location": "Yellowstone National Park",
+     "river": "Yellowstone River",
+     "event_date": "2022-06-13",
+     "affected_people": 10000,
+     "affected_people_type": "visitors",
+     "evacuated": 10000,
+     "evacuated_type": "visitors",
+     "houses_damaged": 200,
+     "water_depth": 2.5,
+     "water_unit": "inches",
+     "rainfall_mm": 63.5,
+     "summary": "Unprecedented flooding tore through the northern half of Yellowstone National Park, washing out bridges and roads and sweeping an employee bunkhouse miles downstream. More than 10,000 visitors were ordered out of the park. The Yellowstone River hit historic levels after days of rain and rapid snowmelt, causing significant damage across parts of southern Montana and northern Wyoming."
+    }
+   },
+   {
+    "n": 14,
+    "id": "article_000010667",
+    "month": "2022_06",
+    "title": "Yellowstone flooding forces 10,000 to leave national park | Taiwan News | Jun. 15, 2022 11:37",
+    "dates": [
+     "2022-06-13"
+    ],
+    "locs": [
+     "Yellowstone National Park",
+     "Red Lodge, Montana",
+     "Gardiner, Montana",
+     "Cooke City, Montana",
+     "Silvergate, Montana",
+     "Livingston, Montana",
+     "Nye, Montana",
+     "Fromberg, Montana",
+     "Corwin Springs, Montana"
+    ],
+    "ev": {
+     "country": "United States",
+     "state": "Montana",
+     "city": "Red Lodge",
+     "location": "Yellowstone National Park",
+     "river": "Yellowstone River",
+     "event_date": "2022-06-13",
+     "affected_people": 10000,
+     "affected_people_type": "visitors",
+     "evacuated": 10000,
+     "evacuated_type": "visitors",
+     "houses_damaged": 200,
+     "economic_loss": 10000000,
+     "economic_loss_currency": "USD",
+     "summary": "Unprecedented flooding tore through the northern half of Yellowstone National Park, washing out bridges and roads and sweeping an employee bunkhouse miles downstream. More than 10,000 visitors were ordered out of the park. The Yellowstone River hit historic levels after days of rain and rapid snowmelt, causing significant damage across parts of southern Montana and northern Wyoming."
+    }
+   }
+  ],
+  "lismore": [
+   {
+    "n": 17,
+    "id": "article_000046551",
+    "month": "2022_02",
+    "title": "Australia: Heavy rains flood towns, tens of thousands ordered to evacuate",
+    "dates": [
+     "2022-02-24",
+     "2022-02-28"
+    ],
+    "locs": [
+     "Lismore",
+     "Brisbane River",
+     "northern New South Wales"
+    ],
+    "ev": {
+     "country": "Australia",
+     "state": "New South Wales",
+     "city": "Lismore",
+     "river": "Wilson River",
+     "event_date": "2022-02-28",
+     "water_level": 14.2,
+     "water_unit": "metres",
+     "flood_duration": 2,
+     "duration_unit": "hours",
+     "evacuated": 30000,
+     "evacuated_type": "residents",
+     "deaths": 9,
+     "deaths_type": "people",
+     "missing": 4,
+     "missing_type": "people",
+     "economic_loss": 75000000,
+     "economic_loss_currency": "A$"
+    }
+   },
+   {
+    "n": 16,
+    "id": "article_000141703",
+    "month": "2022_03",
+    "title": "Australia's worst flooding in a decade, tens of thousands evacuated",
+    "dates": [
+     "2022-02-27",
+     "2022-03-01"
+    ],
+    "locs": [
+     "Lismore",
+     "Woodburn",
+     "Ashgrove",
+     "Brisbane"
+    ],
+    "ev": {
+     "country": "Australia",
+     "city": "Brisbane",
+     "event_date": "2022-02-27",
+     "flood_duration": 6,
+     "duration_unit": "days",
+     "rainfall_mm": 792.8,
+     "water_depth": 1.5,
+     "water_unit": "m",
+     "affected_people": 6000,
+     "affected_people_type": "people",
+     "evacuated": 10000,
+     "evacuated_type": "people",
+     "deaths": 10,
+     "deaths_type": "people",
+     "missing_type": "people",
+     "response_agencies": "Emergency Services, State Emergency Services, Queensland Police, Brisbane Mayor's Office"
+    }
+   }
+  ],
+  "senigallia": [
+   {
+    "n": 16,
+    "id": "article_000148049",
+    "month": "2022_09",
+    "title": "Roundup: Floods in Italy leave at least 10 dead after summer of extreme weather events",
+    "dates": [
+     "2022-09-16"
+    ],
+    "locs": [
+     "Marche, Italy",
+     "Castelleone di Suasa",
+     "Tuscany",
+     "Umbria",
+     "Abruzzo",
+     "Molise",
+     "Lazio",
+     "Friuli Venezia Giulia",
+     "Lombardy",
+     "Liguria"
+    ],
+    "ev": {
+     "country": "Italy",
+     "location": "Marche",
+     "event_date": "2022-09-16",
+     "affected_people": 10,
+     "affected_people_type": "people",
+     "missing": 4,
+     "missing_type": "people",
+     "deaths": 10,
+     "deaths_type": "people",
+     "evacuated_type": "people",
+     "displaced_type": "people",
+     "crop_damage_unit": "units",
+     "livestock_loss_type": "animals",
+     "economic_loss_currency": "currency",
+     "response_agencies": "Italian Firefighters, Italian government",
+     "summary": "At least ten people have been killed and four are reported missing after flash floods hit the Marche region in central Italy overnight, creating what a local mayor described as an 'apocalyptic situation.' Violent thunderstorms shook Marche and the surrounding areas late on Thursday and on Friday, sparking flash floods that uprooted trees, destroyed homes and swept away vehicles."
+    }
+   },
+   {
+    "n": 15,
+    "id": "article_000114341",
+    "month": "2022_09",
+    "title": "A cloudburst in the Marche, at least eight dead and four missing.",
+    "dates": [
+     "2022-09-15"
+    ],
+    "locs": [
+     "Senigallia",
+     "Serra Sant'Abbondio",
+     "Mount Catria"
+    ],
+    "ev": {
+     "country": "Italy",
+     "region": "Marche",
+     "province": "Ancona",
+     "city": "Senigallia",
+     "event_date": "2022-09-15",
+     "cause": "cloudburst",
+     "trigger": "violent cloud storm",
+     "rainfall_mm": 400,
+     "affected_people": 12,
+     "affected_people_type": "people",
+     "deaths": 8,
+     "deaths_type": "people",
+     "missing": 4,
+     "missing_type": "people",
+     "response_agencies": [
+      "180 firefighters",
+      "National Corps helicopter",
+      "Tuscan Fire Brigade",
+      "Florence, Arezzo, Siena, Grosseto commands"
+     ],
+     "summary": "A violent cloud storm hit the Marche region on September 15, 2022, causing at least 8 deaths, 4 missing, and significant damage. The Misa River flooded in Senigallia, and rescue operations were conducted in Pesaro. Over 300 firefighters were involved in relief efforts, with support from multiple regions."
+    }
+   }
+  ]
+ }
+}

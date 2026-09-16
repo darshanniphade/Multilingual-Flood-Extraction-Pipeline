@@ -1,0 +1,64 @@
+{
+  "_comment": "Title-translation settings. Everything the program needs lives here; command-line flags exist only to override a value for a one-off run. Paths may use / or \\. Defaults are tuned for the 16 GB RTX 4060 Ti / 26-core / 512 GB box.",
+
+  "paths": {
+    "_comment": "input_dir is scanned recursively for .json/.jsonl files. articles_subdir restricts that scan to folders of that name, because each month folder also holds crawler bookkeeping json (progress.json, dns_cache.json, metrics/, logs/) that is not article data; set it to \"\" to scan everything. The output file is written as output_dir/output_file and doubles as the resume checkpoint.",
+    "input_dir": "C:/darsh/pipeline/data/flood_events/2024",
+    "output_dir": "C:/darsh/pipeline/data/flood_events/2024",
+    "output_file": "translated_titles.jsonl",
+    "articles_subdir": "articles"
+  },
+
+  "article_id": {
+    "_comment": "The raw article_id restarts numbering in every month folder, so it is prefixed to stay unique: '<prefix><separator><month folder>/<article_id>' -> '2022_01/article_000094047'. prefix 'auto' uses the input_dir folder name when it looks like a year (e.g. .../ssd/2022 -> '2022'); set an explicit string to force one, or \"\" for none.",
+    "prefix": "auto",
+    "separator": "_"
+  },
+
+  "fields": {
+    "_comment": "Record keys read from each source file. language may be absent - see the language section.",
+    "id": "article_id",
+    "title": "title",
+    "language": "language"
+  },
+
+  "language": {
+    "_comment": "NLLB needs a source language per title. When the language field is missing or unrecognised, the language is detected from the title text itself. langdetect is pure Python and therefore GIL-bound, so detection runs in a pool of worker PROCESSES - on threads it throttles the whole pipeline and leaves the GPU idle. Titles shorter than detect_min_chars, or whose language stays unknown, are copied through unchanged so they remain searchable.",
+    "detect_when_missing": true,
+    "detect_min_chars": 10
+  },
+
+  "model": {
+    "_comment": "Loaded from the local HuggingFace cache (offline). Titles are short, so input/generation length is capped for speed.",
+    "name": "facebook/nllb-200-distilled-1.3B",
+    "target_language": "eng_Latn",
+    "max_input_tokens": 128,
+    "max_new_tokens": 48
+  },
+
+  "gpu": {
+    "_comment": "Batches are sized by KV-cache budget, not by a fixed count, so short titles pack into far bigger batches than long ones and VRAM stays full either way. A slot = one cached token = decoder_layers*2*d_model*2 bytes = 96 KiB for the 1.3B, so kv_slot_budget 110000 targets ~10.5 GB of KV on top of the ~2.6 GB model, out of 16 GB. max_batch_size is a fragmentation guard, not a throughput knob: it caps the per-decode-step logits buffer (batch x 0.5 MiB). Batches that still overshoot are split automatically on out-of-memory. Raise kv_slot_budget if peak VRAM sits well below ~14 GB; lower it if OOM splits show up in the summary.",
+    "kv_slot_budget": 110000,
+    "max_batch_size": 1536,
+    "attn_implementation": "sdpa",
+    "expandable_segments": true
+  },
+
+  "cpu": {
+    "_comment": "readers = threads parsing the (many, tiny) json files. detect_workers = separate PROCESSES running language detection, the CPU-heavy stage; set near the core count. detect_chunk = titles a reader hands to a detection worker in one round trip.",
+    "readers": 24,
+    "detect_workers": 20,
+    "detect_chunk": 4096
+  },
+
+  "runtime": {
+    "_comment": "translate_chunk = titles pooled and length-sorted before a translation pass; bigger pools pad less and keep the GPU busier. buffer_queue = pools kept ready for the GPU thread, so translation never waits on reading. flush/checkpoint control writer durability. limit stops after roughly that many new articles (null = no limit, use for a quick test run).",
+    "translate_chunk": 16384,
+    "buffer_queue": 3,
+    "queue_maxsize": 2000000,
+    "write_queue_maxsize": 200000,
+    "flush_every": 10000,
+    "checkpoint_every": 50000,
+    "limit": null
+  }
+}

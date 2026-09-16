@@ -1,0 +1,218 @@
+{
+  "_comment": "Stage 7 - the NLP / semantic layer over the stage-5 extractions. Dense transformer embeddings in a persistent vector store, flood-domain NER, flood-type classification, event coreference, near-duplicate detection, source grounding, GeoNames linking and hybrid retrieval. Paths are absolute because every stage in this repo is; point them at your own trees. Nothing in here is a research constant - every threshold is meant to be swept.",
+
+  "paths": {
+    "extracted_root": "C:/darsh/pipeline/data/extracted",
+    "_articles_comment": "The article trees are not laid out consistently across years: 2021 lives under only_english2021/, and 2021 plus 2023-2025 nest their files one level deeper in articles/ while 2022 does not. Measured, not assumed - a missing override does not error, it silently yields empty bodies, which is what happened here until the per-year file counts were checked (2023: 16,503 files under articles/, none beside it).",
+    "articles_root": "C:/darsh/pipeline/data/only eng/{year}/{month}",
+    "articles_root_overrides": {
+      "2021": "C:/darsh/pipeline/data/only eng/only_english2021/{month}/articles",
+      "2023": "C:/darsh/pipeline/data/only eng/2023/{month}/articles",
+      "2024": "C:/darsh/pipeline/data/only eng/2024/{month}/articles",
+      "2025": "C:/darsh/pipeline/data/only eng/2025/{month}/articles"
+    },
+    "output_root": "C:/darsh/pipeline/data/events",
+    "chroma_dir": "C:/darsh/pipeline/data/events/chroma"
+  },
+
+  "runtime": {
+    "_comment": "log_level is passed to logging.basicConfig by every script. seed fixes numpy/random sampling so annotation samples and medoid tie-breaks are reproducible.",
+    "log_level": "INFO",
+    "seed": 0
+  },
+
+  "embedding": {
+    "_comment": "bge-base-en-v1.5: 109M params, 768-d, MTEB-strong for short English passages. Runs offline from the HF cache (HF_HUB_OFFLINE=1). max_seq_length 256 covers the title + summary + locations string (p99 ~140 tokens). Query instruction is the model's documented retrieval prefix; documents get none.",
+    "model": "BAAI/bge-base-en-v1.5",
+    "device": "cuda",
+    "batch_size": 256,
+    "max_seq_length": 256,
+    "normalize": true,
+    "query_instruction": "Represent this sentence for searching relevant passages: ",
+    "offline": true
+  },
+
+  "chunking": {
+    "_comment": "Optional second index over article bodies, used as evidence passages for the RAG answer step. Off by default: the event strings in flood_events are what coreference and event search need, and 74k bodies at ~4 chunks each is 300k extra vectors. Turn it on (or pass --chunks) when you want passage-level evidence retrieval. Chunks are cut at sentence boundaries, target_chars long, with overlap_chars carried into the next chunk so a fact split across a boundary survives in one piece somewhere.",
+    "enabled": false,
+    "collection": "flood_chunks",
+    "target_chars": 900,
+    "overlap_chars": 150,
+    "min_chars": 200,
+    "max_chunks_per_article": 8,
+    "max_seq_length": 512
+  },
+
+  "index": {
+    "_comment": "Chroma persistent collection with HNSW over cosine space. select=verifiable indexes only extractions with a date AND a location (the stage-5b gate); use flood to index every article the model accepted as one real flood, all for the whole corpus. flush_every controls how often embeddings.npy/ids.json are re-exported during a long run.",
+    "collection": "flood_events",
+    "space": "cosine",
+    "select": "verifiable",
+    "upsert_batch": 2000,
+    "export_matrix": true
+  },
+
+  "ner": {
+    "_comment": "dslim/bert-base-NER is a generic CoNLL-2003 tagger (PER/ORG/LOC/MISC) - NOT a flood-trained model. ner.py runs it for the generic spans and then applies a flood-domain normalisation layer (lexicon + pattern rules + the stage-5 slots) to produce RIVER / FLOOD_TYPE / WEATHER_EVENT / INFRASTRUCTURE / CASUALTY / EVACUATION / DAMAGE. Entities carry a `source` field saying which of the two produced them; only model spans have a model confidence.",
+    "model": "dslim/bert-base-NER",
+    "device": "cuda",
+    "aggregation": "first",
+    "batch_size": 64,
+    "max_chars": 3000,
+    "min_score": 0.5,
+    "use_title": true,
+    "rule_confidence": 0.6,
+    "slot_confidence": 0.9,
+    "river_suffixes": ["river", "rivers", "creek", "canal", "nadi", "nala", "khal", "burn", "beck", "brook", "stream", "tributary"],
+    "lexicon": {
+      "WEATHER_EVENT": ["heavy rain", "heavy rains", "heavy rainfall", "torrential rain", "torrential rains", "downpour", "cloudburst", "monsoon", "monsoon rains", "typhoon", "cyclone", "hurricane", "tropical storm", "storm surge", "thunderstorm", "snowmelt", "glacial lake outburst", "glof", "depression", "low pressure"],
+      "INFRASTRUCTURE": ["dam", "dams", "barrage", "levee", "levees", "embankment", "embankments", "dyke", "dike", "bridge", "bridges", "culvert", "reservoir", "reservoirs", "canal", "spillway", "floodgate", "sluice", "highway", "road", "roads", "railway", "railway line", "power station", "water treatment plant", "school", "schools", "hospital", "hospitals", "airport"],
+      "CASUALTY": ["killed", "dead", "deaths", "died", "drowned", "fatalities", "casualties", "injured", "missing", "swept away", "bodies recovered", "death toll"],
+      "EVACUATION": ["evacuated", "evacuation", "evacuations", "relocated", "rescued", "rescue operation", "relief camp", "relief camps", "shelter", "shelters", "displaced", "stranded", "airlifted"],
+      "DAMAGE": ["damaged", "destroyed", "collapsed", "washed away", "submerged", "inundated", "marooned", "waterlogged", "crops damaged", "crop loss", "livestock lost", "houses damaged", "houses destroyed", "economic loss", "landslide", "landslides", "mudslide"]
+    }
+  },
+
+  "flood_type": {
+    "_comment": "Flood-type classification. Two independent classifiers over the same text (title + summary + cause/trigger slots + optional body head): a transparent weighted-lexicon rule model, and an optional zero-shot pass through the local Qwen3-14B. `method` picks which runs; `agree` runs both and keeps the rule label unless the rule model abstains. The label set follows the standard hydrological typology; Unknown is a first-class answer and is what you get when no cue fires - never guess a type to fill the column.",
+    "_weights_comment": "Cue weights are evidence strength, not frequency. 4 = the label is stated ('flash flood'); 3 = a mechanism only that type produces ('burst its banks', 'storm surge'); 2 = a strong associate ('danger mark', 'drainage system'); 1 = context that is worthless alone ('river', 'traffic'). min_score 2.0 is what makes weight-1 cues non-decisive on their own: a single mention of the word 'river' must never type an article as a River Flood, but 'river' plus 'water level rose' may.",
+    "method": "rules",
+    "labels": ["River Flood", "Flash Flood", "Urban Flood", "Coastal Flood", "Pluvial Flood", "Dam/Reservoir Flood", "Other", "Unknown"],
+    "min_score": 2.0,
+    "margin": 1.0,
+    "max_body_chars": 1500,
+    "use_body": true,
+    "lexicon": {
+      "River Flood": {"river overflow": 3, "river overflowed": 3, "overflowing river": 3, "burst its banks": 3, "broke its banks": 3, "overflowed its banks": 3, "burst their banks": 3, "above the danger mark": 3, "danger mark": 3, "danger level": 2, "warning level": 2, "river swelled": 3, "swollen river": 3, "swollen rivers": 3, "rising river": 2, "river rose": 3, "riverine": 3, "river flood": 3, "river flooding": 3, "in spate": 3, "embankment breach": 2, "breached embankment": 2, "embankment": 2, "riverbank": 2, "river bank": 2, "banks of the": 2, "water level of the": 2, "water level rose": 2, "river water entered": 3, "flood water from the river": 3, "tributary": 1, "catchment": 1, "confluence": 1, "barrage": 1, "low-lying areas along": 2, "river": 1},
+      "Flash Flood": {"flash flood": 4, "flash floods": 4, "flash flooding": 4, "cloudburst": 3, "sudden flood": 3, "wall of water": 3, "torrent": 1, "within minutes": 1, "gushed": 1, "hill torrent": 2, "wadi": 2, "glacial lake outburst": 3, "glof": 3, "swept away in seconds": 3},
+      "Urban Flood": {"urban flood": 4, "urban flooding": 4, "waterlogging": 3, "water logging": 3, "waterlogged": 3, "drainage system": 2, "storm drain": 2, "drains overflowed": 3, "clogged drains": 3, "choked drains": 3, "city streets": 1, "traffic": 1, "underpass": 2, "basement": 1, "metro station": 1, "sewer": 2, "stormwater drain": 3},
+      "Coastal Flood": {"storm surge": 4, "tidal surge": 4, "high tide": 2, "sea water": 2, "seawater": 2, "coastal flood": 4, "coastal flooding": 4, "sea wall": 2, "king tide": 3, "tidal flooding": 3, "saltwater intrusion": 2, "cyclone landfall": 2, "hurricane landfall": 2, "sea level rose": 2, "coastal areas": 1},
+      "Pluvial Flood": {"surface water": 3, "surface runoff": 3, "rainwater accumulated": 3, "rainwater entered": 2, "heavy rainfall caused flooding": 2, "pluvial": 4, "rain-induced flooding": 2, "overland flow": 3, "ponding": 2, "accumulated rainwater": 3},
+      "Dam/Reservoir Flood": {"dam burst": 4, "dam breach": 4, "dam collapsed": 4, "dam failure": 4, "reservoir released": 3, "water released from": 3, "released from the dam": 4, "spillway": 2, "barrage released": 3, "opened the gates": 2, "sluice gates": 2, "canal breach": 2, "levee failure": 3, "levee breach": 3, "dyke burst": 3},
+      "Other": {"tsunami": 4, "seiche": 3, "groundwater flooding": 3, "burst water main": 4, "pipe burst": 3, "ice jam": 3, "snowmelt flood": 3}
+    },
+    "llm": {
+      "enabled": false,
+      "max_chars": 4000
+    }
+  },
+
+  "clustering": {
+    "_comment": "Event coreference: many articles -> one real-world flood. Candidates come from exact top_k cosine kNN over the event embeddings; each candidate pair is then scored by a weighted linear combination of five agreement signals and linked when the score clears link_threshold. Hard gates run first and can veto a link outright regardless of score. Weights sum to 1.0 by convention (nothing enforces it - the threshold moves with them). Set a weight to 0 to ablate that signal.",
+    "top_k": 20,
+    "candidate_min_cosine": 0.70,
+    "link_threshold": 0.82,
+    "weights": {
+      "semantic": 0.55,
+      "date": 0.15,
+      "location": 0.15,
+      "river": 0.05,
+      "flood_type": 0.05,
+      "country": 0.05
+    },
+    "date_window_days": 3,
+    "date_decay_days": 7,
+    "unknown_date_score": 0.35,
+    "unknown_field_score": 0.5,
+    "location_min_jaccard": 0.5,
+    "require_country_agreement": true,
+    "hard_date_gate": true,
+    "max_cluster_span_days": 45
+  },
+
+  "event": {
+    "_comment": "Consolidated-event record. severity_bands are ordinal labels over the two counts the corpus reports most consistently; the first band whose floor is cleared by EITHER count wins. An event where neither count is known gets severity=null, not 'minor'. id_prefix + the first year of the event + a running number gives a stable, sortable event_id.",
+    "id_prefix": "E",
+    "severity_bands": [
+      {"name": "catastrophic", "deaths": 100, "affected_people": 1000000},
+      {"name": "major", "deaths": 20, "affected_people": 100000},
+      {"name": "moderate", "deaths": 3, "affected_people": 10000},
+      {"name": "minor", "deaths": 0, "affected_people": 0}
+    ]
+  },
+
+  "near_dup": {
+    "_comment": "MinHash-LSH over w-word shingles of the article body. Stage 4 removed byte-identical copies with SHA-256; this catches syndicated rewrites, appended bylines and trimmed republications. jaccard_threshold 0.8 is conservative - two articles sharing 80% of their 5-word shingles are the same story, not two stories about the same flood. The `semantic` block is a separate, deliberately non-destructive pass: embedding cosine finds rewrites that share no shingles at all, and those pairs are reported as CANDIDATES only. Nothing is merged on embedding similarity alone.",
+    "select": "flood",
+    "shingle_words": 5,
+    "num_perm": 128,
+    "jaccard_threshold": 0.8,
+    "min_words": 50,
+    "io_workers": 16,
+    "semantic": {
+      "top_k": 10,
+      "cosine_threshold": 0.95,
+      "lexical_ceiling": 0.5,
+      "max_pairs": 200000
+    }
+  },
+
+  "grounding": {
+    "_comment": "Every extracted field is checked back against the source text it came from. A count is grounded when the number appears in the body (as digits, with thousands separators, or as a spelled-out numeral); a date when the ISO date or any surface form of it appears; a location/river/country when the string, or its content tokens, appear. Flood type is grounded when the cue that fired is in the text. NER additionally confirms a location is something a tagger also reads as a place. Nothing here decides truth - it decides whether the extraction is SUPPORTED BY the article.",
+    "ner_enabled": true,
+    "ner_max_chars": 3000,
+    "ner_batch_size": 32,
+    "evidence_window": 160,
+    "max_body_chars": 20000,
+    "token_match_min_ratio": 0.6,
+    "fields": ["event_date", "country", "locations", "rivers", "flood_type", "cause", "deaths", "injured", "missing", "displaced", "evacuated", "affected_people"],
+    "io_workers": 16
+  },
+
+  "geocode": {
+    "_comment": "Entity linking of free-text location strings to GeoNames ids with the offline geonamescache tables (cities >= 15k population, all countries, US states). The extracted country narrows candidates; remaining ties break on population, but only when the top candidate is ambiguity_ratio times larger than the runner-up. Otherwise the mention is emitted with status=ambiguous and every candidate listed - a wrong point on a map is worse than no point.",
+    "min_population": 0,
+    "ambiguity_ratio": 5.0,
+    "max_candidates": 8,
+    "strip_tokens": ["district", "districts", "city", "town", "village", "villages", "province", "state", "region", "county", "area", "areas", "municipality", "prefecture", "department", "governorate", "island", "islands", "tehsil", "taluk", "taluka", "block", "subdivision", "sub-division", "upazila", "commune", "parish", "barangay", "near", "parts of", "the"]
+  },
+
+  "retrieval": {
+    "_comment": "Hybrid retrieval. BM25 (rank_bm25, Okapi) over the same event strings the embeddings were built from, fused with dense Chroma results by reciprocal rank fusion. rrf_k=60 is the value from Cormack et al. 2009. The BM25 index is built once from events_meta.jsonl and cached as a pickle keyed by the row count, so repeat queries are instant.",
+    "dense_top_k": 100,
+    "bm25_top_k": 100,
+    "rrf_k": 60,
+    "final_top_k": 10,
+    "bm25_k1": 1.5,
+    "bm25_b": 0.75,
+    "cache_bm25": true,
+    "_filter_depth_comment": "Metadata filters the vector store cannot evaluate itself (a date range; a country substring) are applied after fusion, so a narrow filter can leave almost nothing. When one is present both retrievers fetch this many times deeper first. Costs one extra BM25 sort and a larger Chroma page; buys back the recall the filter would otherwise destroy.",
+    "filter_depth_multiplier": 10,
+    "_event_support_comment": "When article hits are folded onto events, an event scores its BEST article times (1 + weight * ln(1 + matching articles)). Summing the articles instead lets a 90-article cluster of weak matches outrank a directly relevant single report - measured: 'Assam floods June 2021' returned the Yalta 2021 cluster first. Corroboration breaks ties; it does not decide the ranking.",
+    "event_support_weight": 0.05
+  },
+
+  "rerank": {
+    "_comment": "Optional cross-encoder reranking of the fused candidate list. Offline-first: nothing is ever downloaded. If `model` names a directory or an id already in the HF cache it is loaded and used; otherwise rerank.py reports that no local reranker is available and search falls back to the RRF order. Set model to a local path (e.g. a cached BAAI/bge-reranker-base) to switch it on.",
+    "enabled": false,
+    "model": null,
+    "device": "cuda",
+    "batch_size": 32,
+    "max_length": 512,
+    "top_n": 50
+  },
+
+  "llm": {
+    "_comment": "Structured extraction / answering over RETRIEVED TEXT, through the same local Ollama server stage 5 uses. Embeddings are never sent to the model - the vector index selects which articles the model reads, the model only ever sees natural language. temperature 0 and format=json for reproducible, parseable output; think=false because qwen3 otherwise leaks its reasoning into the response.",
+    "model": "qwen3:14b",
+    "host": null,
+    "keep_alive": "30m",
+    "think": false,
+    "temperature": 0,
+    "top_p": 1,
+    "num_ctx": 8192,
+    "num_predict": 1024,
+    "format": "json",
+    "timeout_seconds": 300,
+    "retries": 2,
+    "max_evidence_chars": 2500,
+    "max_evidence_docs": 5
+  },
+
+  "eval": {
+    "_comment": "Gold-set sampling and scoring. Samples are stratified by year and by the stage-5 verdict so a small annotation budget still covers positives, negatives and the borderline contains_flood-but-not-verifiable band. seed comes from runtime.seed unless overridden here.",
+    "sample_size": 200,
+    "strata": ["verifiable", "flood_not_verifiable", "not_flood"],
+    "retrieval_k": [1, 5, 10, 20]
+  }
+}

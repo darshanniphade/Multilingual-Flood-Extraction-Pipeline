@@ -1,0 +1,47 @@
+{
+  "_comment": "2022 run: articles live directly in each month folder (no articles/ subdir), and the 2022 translated_articles tree carries no publish_date field, so publish_date_root is disabled. Everything else inherits the calibration notes from config.json.",
+
+  "paths": {
+    "input_root": "C:/darsh/pipeline/data/only eng/2022",
+    "output_root": "C:/darsh/pipeline/data/extracted/2022",
+    "system_prompt_file": "C:/darsh/pipeline/6_extract_events/system_prompt.txt"
+  },
+
+  "model": {
+    "name": "qwen3:14b",
+    "keep_alive": "30m",
+    "think": false
+  },
+
+  "generation": {
+    "num_ctx": 4096,
+    "num_predict": 1024,
+    "temperature": 0,
+    "top_p": 1,
+    "format": "json"
+  },
+
+  "input": {
+    "articles_subdir": ".",
+    "id_field": "article_id",
+    "title_field": "translated_title",
+    "text_field": "translated_text",
+    "max_article_chars": 12000,
+    "publish_date_root": null,
+    "publish_date_field": "publish_date"
+  },
+
+  "run": {
+    "_comment": "request_timeout_seconds caps a single model call. ollama's client defaults to no timeout, so one wedged request would pin a worker indefinitely. A typical article takes ~15s at 12 workers, so 180s is ~12x headroom - long enough never to fire on a merely slow article.",
+    "workers": 12,
+    "retries": 2,
+    "retry_backoff_seconds": 2,
+    "request_timeout_seconds": 180,
+    "progress_seconds": 1
+  },
+
+  "output": {
+    "extraction_field": "extraction",
+    "include_title": true
+  }
+}

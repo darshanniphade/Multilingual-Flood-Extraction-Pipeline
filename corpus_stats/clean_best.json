@@ -1,0 +1,715 @@
+{
+ "2021": [
+  {
+   "canon": 28,
+   "total": 29,
+   "id": "article_000156610",
+   "month": "2021_11",
+   "title": "The Central team will visit the flood areas and assure relief.",
+   "gate": {
+    "dates": [
+     "2021-11-13",
+     "2021-11-20"
+    ],
+    "locs": [
+     "Chittoor district",
+     "YSSar district",
+     "Nellore districts",
+     "Vyassar district",
+     "Tirupati city",
+     "Mandapalle",
+     "Gollavanigunta",
+     "Krishnareddi Nagar",
+     "Pullavanigunta",
+     "Koramegunta",
+     "Leelamahal",
+     "Karakambadi roads",
+     "Nandappalle Gram Road",
+     "Old Chanambatt",
+     "Royalla Dendru dam",
+     "Suraripalle road",
+     "Swarnmukhi River",
+     "Ranigunda Mandal",
+     "Gazulamandiyam National Highway",
+     "Padipeta",
+     "Dandepalle Road",
+     "Virappalli area",
+     "Gangwaram constituency",
+     "Pulpattu",
+     "Upper Mandapalle",
+     "Lower Mandapalle",
+     "Annamaya dam",
+     "Buggwanka project",
+     "Papaguni river drainage area",
+     "Bhedarputta mandal",
+     "V.S.K.L."
+    ]
+   },
+   "event": {
+    "country": "India",
+    "state": "Andhra Pradesh",
+    "district": "Chittoor",
+    "flood_dates": [
+     "2021-11-13",
+     "2021-11-20"
+    ],
+    "event_date": "2021-11-13",
+    "start_date": "2021-11-13",
+    "end_date": "2021-11-20",
+    "affected_people": 231000,
+    "affected_people_type": "people",
+    "evacuated": 79590,
+    "evacuated_type": "people",
+    "displaced": 15,
+    "displaced_type": "people",
+    "deaths": 44,
+    "deaths_type": "people",
+    "injured_type": "people",
+    "missing_type": "people",
+    "houses_damaged": 5740,
+    "houses_destroyed": 98514,
+    "roads_damaged": 3129,
+    "bridges_damaged": 20,
+    "schools_damaged": 1,
+    "crop_damage": 286000,
+    "crop_damage_unit": "hectares",
+    "livestock_loss_type": "animals",
+    "economic_loss": 13200000000,
+    "economic_loss_currency": "INR",
+    "response_agencies": [
+     "NDRF",
+     "SDRF",
+     "Fire services",
+     "State Government"
+    ],
+    "summary": "Heavy rainfall in Chittoor, Anantapuram, Kadapa and Nellore districts from 13th to 20th November caused unprecedented damage. 199 mandals and 1,990 villages in four districts were severely damaged, 211 villages and 23 towns were flooded, 2.31 lakh people were facing severe hardship. 44 people died, 15 people were left homeless, 98,514 houses were flooded, 5,740 houses were damaged, crop losses were recorded on 2.86 lakh hectares in four districts. 3,129 roads and 20 buildings were damaged in Panchayati Raj Sector. The Centre has to be generous in its response to the damage estimated at Rs. thousands crore."
+   }
+  },
+  {
+   "canon": 26,
+   "total": 26,
+   "id": "article_000213364",
+   "month": "2021_07",
+   "title": "Floods in Germany: How Germans Cope With the Catastrophe of the Century",
+   "gate": {
+    "dates": [
+     "2021-07-14",
+     "2021-07-15"
+    ],
+    "locs": [
+     "Alternar",
+     "Arweiler",
+     "Erftstadt",
+     "Zinzig"
+    ]
+   },
+   "event": {
+    "country": "Germany",
+    "state": "North Rhine-Westphalia",
+    "province": "North Rhine-Westphalia",
+    "district": "Erftstadt",
+    "city": "Erftstadt",
+    "location": "Erftstadt",
+    "river": "Erft",
+    "event_date": "2021-07-14",
+    "start_date": "2021-07-14",
+    "end_date": "2021-07-15",
+    "affected_people": 43,
+    "affected_people_type": "people",
+    "evacuated": 55,
+    "evacuated_type": "people",
+    "deaths": 43,
+    "deaths_type": "people",
+    "missing": 1300,
+    "missing_type": "people",
+    "houses_damaged": 1,
+    "houses_destroyed": 1,
+    "roads_damaged": 1,
+    "bridges_damaged": 1,
+    "schools_damaged": 1,
+    "hospitals_damaged": 1,
+    "response_agencies": "Bundeswehr",
+    "summary": "Floods in Erftstadt, North Rhine-Westphalia, caused a landslide that destroyed part of the city, including several houses and a historic castle. At least 43 people died, and the situation remains critical with infrastructure severely damaged."
+   }
+  },
+  {
+   "canon": 25,
+   "total": 26,
+   "id": "article_000119708",
+   "month": "2021_08",
+   "title": "Flood in Hubei's Yulin town: People cling to trees to escape three times after being swept away by floodwaters",
+   "gate": {
+    "dates": [
+     "2021-08-12"
+    ],
+    "locs": [
+     "Liulin, Hubei Province",
+     "Liu Lin, Shandong province",
+     "Liu Lin and Lotus Street",
+     "Liu Yun-hui's shop",
+     "Lyulin Town Center School"
+    ]
+   },
+   "event": {
+    "location": "Liulin, Hubei Province",
+    "event_date": "2021-08-12",
+    "affected_people": 8000,
+    "affected_people_type": "people",
+    "deaths": 21,
+    "deaths_type": "people",
+    "missing": 4,
+    "missing_type": "people",
+    "evacuated": 78,
+    "evacuated_type": "people",
+    "displaced": 450,
+    "displaced_type": "people",
+    "houses_damaged": 1,
+    "houses_destroyed": 1,
+    "shops_damaged": 1,
+    "roads_damaged": 1,
+    "bridges_damaged": 1,
+    "schools_damaged": 1,
+    "hospitals_damaged": 1,
+    "crop_damage": 1,
+    "crop_damage_unit": "store",
+    "livestock_loss": 1,
+    "livestock_loss_type": "fruit shop",
+    "economic_loss": 1,
+    "response_agencies": "firefighters, local electricity department, county people's government, charitable enterprises, disease control personnel",
+    "summary": "Severe flooding occurred in Liulin, Hubei Province on August 12, 2021, with extreme heavy rainfall of 503 mm in 12 hours. The flood resulted in 21 deaths, 4 missing, and over 8,000 people affected. Rescue efforts were conducted, and relief materials were provided to the affected population. The flood also caused damage to shops, schools, and infrastructure."
+   }
+  },
+  {
+   "canon": 24,
+   "total": 26,
+   "id": "article_000039803",
+   "month": "2021_09",
+   "title": "Ida Drenches Connecticut, Causes Major Flooding",
+   "gate": {
+    "dates": [
+     "2021-09-01",
+     "2021-09-02"
+    ],
+    "locs": [
+     "Plainville",
+     "Bridgeport",
+     "Hartford",
+     "Waterbury",
+     "Middletown",
+     "Meriden",
+     "Wallingford",
+     "Stamford",
+     "Norwalk",
+     "Norwich",
+     "Gillette Castle State Park",
+     "Indian Well State Park"
+    ]
+   },
+   "event": {
+    "flood_dates": [
+     "2021-09-01",
+     "2021-09-02"
+    ],
+    "flooded_locations": [
+     "Plainville",
+     "Bridgeport",
+     "Hartford",
+     "Waterbury",
+     "Middletown",
+     "Meriden",
+     "Wallingford",
+     "Stamford",
+     "Norwalk",
+     "Norwich",
+     "Gillette Castle State Park",
+     "Indian Well State Park"
+    ],
+    "event_date": "2021-09-01",
+    "start_date": "2021-09-01",
+    "end_date": "2021-09-02",
+    "cause": "remnants of Hurricane Ida",
+    "trigger": "heavy rainfall",
+    "rainfall_mm": 215.9,
+    "water_depth": 2.5,
+    "water_unit": "m",
+    "flood_duration": 36,
+    "duration_unit": "hours",
+    "affected_people": 18,
+    "affected_people_type": "people",
+    "evacuated": 18,
+    "evacuated_type": "people",
+    "displaced": 18,
+    "displaced_type": "people",
+    "houses_damaged": 2,
+    "roads_damaged": 12,
+    "bridges_damaged": 1,
+    "schools_damaged": 2,
+    "economic_loss": 21500,
+    "economic_loss_currency": "USD",
+    "response_agencies": [
+     "Connecticut Department of Energy and Environmental Protection",
+     "Connecticut Department of Public Health",
+     "Connecticut Department of Transportation",
+     "Fairfield Police Department",
+     "Bridgeport emergency officials",
+     "Norwalk officials",
+     "Darien officials"
+    ],
+    "summary": "The remnants of Hurricane Ida caused massive flooding in Connecticut from Wednesday into early Thursday, stranding vehicles in parts of the state and forcing rescues from homes in Plainville. The storm dumped several inches of rain in parts of the state, causing major flooding on streets and river levels to rise to dangerous levels. Some towns saw seven to eight inches of rain since Wednesday morning. Water levels around the state are very high, so there is a possibility of strong currents and hazardous debris in rivers and streams. Gillette Castle State Park in East Haddam and Indian Well State Park in Shelton are closed because of storm damage. Dozens of schools across Connecticut delayed opening or closed for the day Thursday due to the ongoing flooding issues and damage left by Ida. The Connecticut Department of Transportation is responding to damage Ida caused on state roads, culverts and bridges. In Plainville, 18 people were rescued from homes on Forestville Avenue overnight. Several roads in Plainville were impassable. Metro-North suspended service on all lines late Wednesday night due to the severe weather and said it expected service to stay out overnight due to flooding and power outages. Police in Fairfield County were warning of road closures due to flooding and asking people not to travel unless it is an emergency. As of midnight, Bridgeport emergency officials were reporting 17 locations with vehicles stranded or submerged by floodwaters, and at least 22 streets flooded. In Norwalk, multiple streets were closed due to flooding. Fairfield police described scenes of multiple vehicles stuck or submerged on flooded roadways. From 7 p.m Wednesday to 6 a.m. Thursday, Fairfield Police Department responded to 40 flooding condition calls with approximately 30 vehicles towed due to road conditions, 13 road hazards and two motor vehicle crashes. Up to eight and a half inches of rain fell in Stamford. The mayor's office said that by 10 a.m., city emergency management officials had responded to 17 motor vehicle crashes, flooded buildings, more than 600 power outages, and 18 water rescues. Officials in Darien reported flooding and multiple trouble spots Wednesday night. As of 4 a.m., Eversource was reporting more than 21,500 outages and United Illuminating was reporting more than 16,000."
+   }
+  }
+ ],
+ "2022": [
+  {
+   "canon": 25,
+   "total": 25,
+   "id": "article_000013633",
+   "month": "2022_10",
+   "title": "Flooding in Thanh Hoa, Nghệ An, Hà Tĩnh killed eight people",
+   "gate": {
+    "dates": [
+     "2022-10-02"
+    ],
+    "locs": [
+     "Thanh Hoa",
+     "Nghệ An",
+     "Hà Tĩnh",
+     "Ky Son district",
+     "Tac Chau",
+     "Mường Xen town",
+     "Ta Chau commune",
+     "Sơn Hà",
+     "Cang",
+     "Sơn Hà",
+     "Ta Cạ Public Security Society",
+     "Mường Xén to Tây Sơn line",
+     "Hòa Sơn",
+     "Ta Cạ commune"
+    ]
+   },
+   "event": {
+    "country": "Vietnam",
+    "province": "Hà Tĩnh",
+    "district": "Ky Son",
+    "city": "Cang",
+    "location": "Ta Cạ commune",
+    "event_date": "2022-10-02",
+    "affected_people": 14033,
+    "affected_people_type": "houses",
+    "evacuated": 2000,
+    "evacuated_type": "homes",
+    "deaths": 8,
+    "deaths_type": "people",
+    "houses_damaged": 143,
+    "houses_destroyed": 19,
+    "roads_damaged": 9150,
+    "bridges_damaged": 82,
+    "schools_damaged": 127,
+    "crop_damage": 11435,
+    "crop_damage_unit": "hectares",
+    "livestock_loss": 155340,
+    "livestock_loss_type": "livestock, poultry",
+    "economic_loss": 710,
+    "economic_loss_currency": "tons of salt",
+    "response_agencies": "Standing Office of the National Directorate for Disaster Prevention",
+    "summary": "Flooding in the provinces of Thanh Hoa, Nghệ An, Hà Tĩnh has killed 8 people. Floodwaters caused 26 houses to be damaged by over 70%; 143 houses damaged, roofs splayed; 55 houses affected by landslides; more than 2,000 homes evacuated; 14,033 houses flooded. Floodwaters also produced 11,435 hectares of rice, colorful flowers; more than 3,800 hectares of industrial, annual, perennial fruit trees; nearly 135 hectares of forest; over 9,000 hectares of ponds; more than 710 tons of salt damaged; 155,340 livestock, poultry killed, drifted; 127 school sites affected; 9,150 m of ditch; 26 small dam dam damaged; 82 bridges, damaged; 1,550 m of river bank washed away; over 75,800 m3 of rock flooded; 112 sewers damaged; 29 sites flooded; 100 sites washed away; 51 power poles, over 5,500 m of fence collapsed. In particular in Ky Son district, Nghệ An province, this is the area that was heavily damaged by the flooding, as of 17:30 on 2 October, 14 houses were washed away (Tac Chau, Mường Xen town); 85 houses in Ta Chau commune and Mường Xen town; flooded State agencies in Block 1, Mường Xen town. Currently, the water has receded, leaving mud, filling the soil; 19 houses were washed away, including 3 strong houses completely washed away (in the city of Cang, Sơn Hà); completely collapsed the workhouse of the Ta Cạ Public Security Society. Several sections of the Mường Xén to Tây Sơn line (including 4 very heavy landslides), damaged the iron arch bridge of Hòa Sơn, Ta Cạ commune. Traffic to the towns of Ta Chau and Ti Sơn was completely jammed; the road was diverted to the 7th national highway at Ta Chau, where vehicles are currently unable to pass; the road was diverted to 10 points on the 7th national highway in the area of Nậm Cắn. In addition, the floodwater isolated two communes, including Hòa Sơn, which had a population of 236 and 966 people, and Sơn Hà, which was completely isolated; two cars were washed away (one was rescued); 10 cars were flooded."
+   }
+  },
+  {
+   "canon": 22,
+   "total": 22,
+   "id": "article_000089863",
+   "month": "2022_04",
+   "title": "READ IN FULL | President Ramaphosa announces declaration of national state of disaster after floods",
+   "gate": {
+    "dates": [
+     "2022-04-11",
+     "2022-04-12"
+    ],
+    "locs": [
+     "KwaZulu-Natal",
+     "Eastern Cape",
+     "Ethekwini metro",
+     "iLembe",
+     "Ugu",
+     "King Cetshwayo",
+     "uMgungundlovu",
+     "Alfred Nzo",
+     "Joe Gqabi",
+     "OR Tambo",
+     "Port St Johns"
+    ]
+   },
+   "event": {
+    "country": "South Africa",
+    "province": "KwaZulu-Natal",
+    "district": "Ethekwini",
+    "event_date": "2022-04-11",
+    "start_date": "2022-04-11",
+    "end_date": "2022-04-12",
+    "affected_people": 40000,
+    "affected_people_type": "people",
+    "evacuated": 40000,
+    "evacuated_type": "people",
+    "deaths": 443,
+    "deaths_type": "people",
+    "missing": 48,
+    "missing_type": "people",
+    "houses_damaged": 8300,
+    "houses_destroyed": 4000,
+    "roads_damaged": 1300,
+    "bridges_damaged": 1300,
+    "schools_damaged": 600,
+    "hospitals_damaged": 66,
+    "economic_loss": 270000,
+    "economic_loss_currency": "learners"
+   }
+  },
+  {
+   "canon": 21,
+   "total": 22,
+   "id": "article_000103223",
+   "month": "2022_07",
+   "title": "At least 16 people are dead after Kentucky's catastrophic flooding, and the death toll is expected to rise",
+   "gate": {
+    "dates": [
+     "2022-07-28"
+    ],
+    "locs": [
+     "Knott County",
+     "Perry County",
+     "Letcher County",
+     "Clay County",
+     "Hazard, Kentucky",
+     "Oneida Community near Manchester, Kentucky",
+     "Floyd County",
+     "Whitesburg"
+    ]
+   },
+   "event": {
+    "country": "United States",
+    "state": "Kentucky",
+    "county": "Knott County",
+    "location": "Knott County",
+    "event_date": "2022-07-28",
+    "affected_people": 16,
+    "affected_people_type": "people",
+    "deaths": 16,
+    "deaths_type": "people",
+    "missing": 6,
+    "missing_type": "people",
+    "evacuated": 80,
+    "evacuated_type": "people",
+    "displaced": 23000,
+    "displaced_type": "people",
+    "houses_damaged": "hundreds",
+    "roads_damaged": "numerous",
+    "bridges_damaged": 7,
+    "economic_loss": "significant",
+    "economic_loss_currency": "USD",
+    "response_agencies": "Kentucky State Police, National Guard, Federal Emergency Management Agency (FEMA), West Virginia National Guard, Tennessee National Guard",
+    "summary": "Catastrophic flooding in Kentucky resulted in at least 16 deaths, including children, and left many people missing. The flooding was exacerbated by heavy rainfall and caused widespread damage to homes, roads, and bridges. Rescue efforts were ongoing, with hundreds of boat and air rescues conducted. The governor warned that the death toll is expected to rise."
+   }
+  },
+  {
+   "canon": 21,
+   "total": 21,
+   "id": "article_000009739",
+   "month": "2022_03",
+   "title": "Two People Killed in Floods and Landslides in Manado City",
+   "gate": {
+    "dates": [
+     "2022-03-03"
+    ],
+    "locs": [
+     "Kelurahan Denlu",
+     "Kelurahan Malendeng",
+     "Kelurahan Paal Dua",
+     "Kelurahan Ranomuut",
+     "Ranotana Weru",
+     "Karombasan North",
+     "Wanea",
+     "Singkil Two",
+     "Kombos East",
+     "Tenate Tanjung",
+     "Sumompo Kelurahan",
+     "Taas Kelurahan",
+     "New Tikala Kelurahan"
+    ]
+   },
+   "event": {
+    "country": "Indonesia",
+    "province": "North Sulawesi",
+    "city": "Manado City",
+    "location": "Kelurahan Denlu, Kelurahan Malendeng, Kelurahan Paal Dua, Kelurahan Ranomuut, Ranotana Weru, Karombasan North, Wanea, Singkil Two, Kombos East, Tenate Tanjung, Sumompo Kelurahan, Taas Kelurahan, New Tikala Kelurahan",
+    "river": "Tondano River, Sario River, Malendeng River, Bailang River",
+    "event_date": "2022-03-03",
+    "affected_people": 278,
+    "affected_people_type": "people",
+    "evacuated": 104,
+    "evacuated_type": "people",
+    "deaths": 2,
+    "deaths_type": "people",
+    "injured_type": "people",
+    "missing_type": "people",
+    "houses_damaged": 155,
+    "roads_damaged": 2,
+    "crop_damage_unit": "hectares",
+    "livestock_loss_type": "animals",
+    "economic_loss_currency": "IDR",
+    "water_level": 75,
+    "water_unit": "cm"
+   }
+  }
+ ],
+ "2023": [
+  {
+   "canon": 31,
+   "total": 31,
+   "id": "article_000209510",
+   "month": "2023_08",
+   "title": "Three rivers in Hebei region flooded, the owner of the area: all rely on collective self-rescue (pictured)",
+   "gate": {
+    "dates": [
+     "2023-07-29",
+     "2023-07-31",
+     "2023-08-01",
+     "2023-08-02",
+     "2023-08-03",
+     "2023-08-04"
+    ],
+    "locs": [
+     "Nanshan-Sippo County",
+     "Nanshan Three Pools",
+     "Yangtze River",
+     "104th National Road",
+     "Nonsanpopo",
+     "Noshino hillside",
+     "Yangtze",
+     "Three Gorges area",
+     "Three Pans Maokou"
+    ]
+   },
+   "event": {
+    "event_date": "2023-07-29",
+    "flood_duration": 6,
+    "duration_unit": "days",
+    "water_depth": 3,
+    "water_unit": "m",
+    "affected_people": 20,
+    "affected_people_type": "people",
+    "deaths": 31,
+    "deaths_type": "people",
+    "injured": 3,
+    "injured_type": "people",
+    "missing": 1,
+    "missing_type": "people",
+    "evacuated": 20,
+    "evacuated_type": "people",
+    "displaced": 20,
+    "displaced_type": "people",
+    "houses_damaged": 1,
+    "houses_destroyed": 1,
+    "roads_damaged": 2,
+    "bridges_damaged": 2,
+    "schools_damaged": 1,
+    "hospitals_damaged": 1,
+    "crop_damage": 1,
+    "crop_damage_unit": "area",
+    "livestock_loss": 1,
+    "livestock_loss_type": "cattle",
+    "economic_loss": 1,
+    "economic_loss_currency": "currency",
+    "response_agencies": [
+     "government",
+     "rescue workers",
+     "journalists"
+    ],
+    "summary": "Heavy rains since July 29 caused flooding in Nanshan-Sippo County, leading to mudslides, road and bridge collapses, and severe damage to homes, schools, and hospitals. Over 20 people were displaced, 31 people died, and 3 were injured. The area experienced a lack of water, electricity, and food, with villagers relying on self-rescue efforts. Rescue operations were ongoing, with supplies being transported to the affected areas."
+   }
+  },
+  {
+   "canon": 30,
+   "total": 30,
+   "id": "article_000061407",
+   "month": "2023_08",
+   "title": "Anger in China over flooding of towns, in part, to save Beijing | Klean Industries",
+   "gate": {
+    "dates": [
+     "2023-08-02"
+    ],
+    "locs": [
+     "Zhuozhou",
+     "Hebei",
+     "Beijing",
+     "Tianjin"
+    ]
+   },
+   "event": {
+    "country": "China",
+    "province": "Hebei",
+    "city": "Zhuozhou",
+    "event_date": "2023-08-02",
+    "flood_duration": 3,
+    "duration_unit": "days",
+    "water_depth": 23,
+    "water_unit": "ft",
+    "affected_people": 1000000,
+    "affected_people_type": "people",
+    "evacuated": 1000000,
+    "evacuated_type": "people",
+    "displaced": 1000000,
+    "displaced_type": "people",
+    "missing": 500,
+    "missing_type": "people",
+    "houses_damaged": 1000,
+    "houses_destroyed": 500,
+    "roads_damaged": 200,
+    "bridges_damaged": 50,
+    "schools_damaged": 30,
+    "hospitals_damaged": 15,
+    "crop_damage": 3500000,
+    "crop_damage_unit": "USD",
+    "livestock_loss": 700,
+    "livestock_loss_type": "animals",
+    "economic_loss": 3500000,
+    "economic_loss_currency": "USD",
+    "response_agencies": [
+     "government",
+     "China Daily",
+     "Humane Society International",
+     "Capital Animal Welfare Association",
+     "Dalian Vshine"
+    ],
+    "summary": "Flooding occurred in Zhuozhou, Hebei, China, as a result of heavy rainfall and the intentional diversion of floodwaters to protect Beijing and Tianjin. The flood caused significant damage to homes, businesses, and infrastructure, with over a million people evacuated and many displaced. The event sparked public anger due to the lack of warning and compensation for affected residents."
+   }
+  },
+  {
+   "canon": 30,
+   "total": 30,
+   "id": "article_000112921",
+   "month": "2023_08",
+   "title": "Flood in Shulan: Houses are low, and the mood is sudden",
+   "gate": {
+    "dates": [
+     "2023-08-03",
+     "2023-08-04",
+     "2023-08-05",
+     "2023-08-06",
+     "2023-08-07"
+    ],
+    "locs": [
+     "Shulan",
+     "Khang",
+     "Kimma Town",
+     "Kayin Town",
+     "Seili Town",
+     "Changsheng Village",
+     "Longshan Village",
+     "Bhatri",
+     "Five Dads",
+     "Shinkai",
+     "Daxing Village",
+     "Buan",
+     "Kim Ma"
+    ]
+   },
+   "event": {
+    "city": "Shulan",
+    "location": "Khang",
+    "river": "Larin River",
+    "event_date": "2023-08-03",
+    "start_date": "2023-08-03",
+    "end_date": "2023-08-07",
+    "affected_people": 400,
+    "affected_people_type": "people",
+    "evacuated": 85,
+    "evacuated_type": "people",
+    "displaced": 1000,
+    "displaced_type": "people",
+    "deaths": 22,
+    "deaths_type": "people",
+    "missing": 1,
+    "missing_type": "people",
+    "houses_damaged": 1,
+    "houses_destroyed": 1,
+    "roads_damaged": 1,
+    "bridges_damaged": 1,
+    "schools_damaged": 1,
+    "hospitals_damaged": 1,
+    "crop_damage": 1,
+    "crop_damage_unit": "area",
+    "livestock_loss": 1,
+    "livestock_loss_type": "livestock",
+    "economic_loss": 1,
+    "economic_loss_currency": "currency",
+    "response_agencies": "Jilin City Fire Brigade, Shulan City Flood Prevention Command, village committees, volunteer rescue teams",
+    "summary": "Heavy rains caused flooding in Shulan, damaging infrastructure, displacing thousands, and resulting in multiple fatalities and missing persons. Rescue operations were conducted, and post-disaster reconstruction efforts are underway."
+   }
+  },
+  {
+   "canon": 30,
+   "total": 30,
+   "id": "article_000114056",
+   "month": "2023_08",
+   "title": "Flood in Shulan: Houses are low, and the mood is sudden",
+   "gate": {
+    "dates": [
+     "2023-08-03",
+     "2023-08-04",
+     "2023-08-05",
+     "2023-08-06",
+     "2023-08-07"
+    ],
+    "locs": [
+     "Shulan",
+     "Khang",
+     "Kimma Town",
+     "Kayin Town",
+     "Seili Town",
+     "Changsheng Village",
+     "Longshan Village",
+     "Five Village",
+     "Bhatri",
+     "Five Dads",
+     "Daxing Village",
+     "Buan",
+     "Shinkai",
+     "Larin River"
+    ]
+   },
+   "event": {
+    "city": "Shulan",
+    "location": "Khang",
+    "river": "Larin River",
+    "event_date": "2023-08-03",
+    "start_date": "2023-08-03",
+    "end_date": "2023-08-07",
+    "affected_people": 400,
+    "affected_people_type": "people",
+    "evacuated": 85,
+    "evacuated_type": "people",
+    "displaced": 1000,
+    "displaced_type": "people",
+    "deaths": 22,
+    "deaths_type": "people",
+    "missing": 1,
+    "missing_type": "people",
+    "houses_damaged": 1,
+    "houses_destroyed": 1,
+    "roads_damaged": 1,
+    "bridges_damaged": 1,
+    "schools_damaged": 1,
+    "hospitals_damaged": 1,
+    "crop_damage": 1,
+    "crop_damage_unit": "area",
+    "livestock_loss": 1,
+    "livestock_loss_type": "livestock",
+    "economic_loss": 1,
+    "economic_loss_currency": "currency",
+    "response_agencies": "Jilin City Fire Brigade, Shulan City Flood Prevention Command, village committees, volunteer rescue teams",
+    "summary": "Heavy rains caused flooding in Shulan, damaging roads, bridges, and houses, displacing thousands of people, and resulting in 22 deaths and 1 missing person. Rescue operations were conducted, and post-disaster reconstruction efforts are underway."
+   }
+  }
+ ]
+}
